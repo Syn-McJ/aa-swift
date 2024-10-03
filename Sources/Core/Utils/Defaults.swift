@@ -25,15 +25,14 @@ extension Chain {
         switch self.id {
         case Chain.MainNet.id,
              Chain.Sepolia.id,
-             Chain.Goerli.id,
              Chain.Polygon.id,
-             Chain.PolygonMumbai.id,
              Chain.Optimism.id,
              Chain.OptimismGoerli.id,
              Chain.Arbitrum.id,
              Chain.ArbitrumGoerli.id,
              Chain.Base.id,
-             Chain.BaseGoerli.id:
+             Chain.BaseGoerli.id,
+             Chain.BaseSepolia.id:
             return EthereumAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
         default:
             throw DefaultsError.noDefaultEntryPoint("no default entry point contract exists for \(name)")
@@ -54,11 +53,10 @@ extension Chain {
              Chain.Optimism.id,
              Chain.Arbitrum.id,
              Chain.Base.id,
-             Chain.BaseGoerli.id:
+             Chain.BaseGoerli.id,
+             Chain.BaseSepolia.id:
             return EthereumAddress("0x15Ba39375ee2Ab563E8873C8390be6f2E2F50232")
         case Chain.Sepolia.id,
-             Chain.Goerli.id,
-             Chain.PolygonMumbai.id,
              Chain.OptimismGoerli.id,
              Chain.ArbitrumGoerli.id:
             return EthereumAddress("0x9406Cc6185a346906296840746125a0E44976454")

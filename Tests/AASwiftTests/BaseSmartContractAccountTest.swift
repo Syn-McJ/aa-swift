@@ -16,7 +16,7 @@ final class BaseSmartContractAccountTest: XCTestCase  {
     @Mock private var signer: SmartAccountSigner
     
     func test_encodeGetSenderAddress_returns_correctHex() async throws {
-        let scAccount = SimpleSmartContractAccount(rpcClient: rpcClient, factoryAddress: EthereumAddress("0x000000893A26168158fbeaDD9335Be5bC96592E2"), signer: signer, chain: Chain.PolygonMumbai)
+        let scAccount = SimpleSmartContractAccount(rpcClient: rpcClient, factoryAddress: EthereumAddress("0x000000893A26168158fbeaDD9335Be5bC96592E2"), signer: signer, chain: Chain.BaseSepolia)
         let initCode = await scAccount.getAccountInitCode()
         let encoded = scAccount.encodeGetSenderAddress(initCode: initCode).web3.hexString
         XCTAssertEqual(
