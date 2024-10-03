@@ -9,9 +9,9 @@ import Foundation
 import BigInt
 
 public struct Currency {
-    let name: String
-    let symbol: String
-    let decimals: Int
+    public let name: String
+    public let symbol: String
+    public let decimals: Int
 }
 
 public class Chain: Equatable {
@@ -39,9 +39,7 @@ public class Chain: Equatable {
 extension Chain {
     public static let MainNet = Chain(id: 1, network: "homestead", name: "Ethereum", currency: Currency(name: "Ether", symbol: "ETH", decimals: 18))
     public static let Sepolia = Chain(id: 11_155_111, network: "sepolia", name: "Sepolia", currency: Currency(name: "Sepolia Ether", symbol: "SEP", decimals: 18))
-    public static let Goerli = Chain(id: 5, network: "goerli", name: "Goerli", currency: Currency(name: "Goerli Ether", symbol: "ETH", decimals: 18))
     public static let Polygon = Chain(id: 137, network: "matic", name: "Polygon", currency: Currency(name: "MATIC", symbol: "MATIC", decimals: 18))
-    public static let PolygonMumbai = Chain(id: 80_001, network: "maticmum", name: "Polygon Mumbai", currency: Currency(name: "MATIC", symbol: "MATIC", decimals: 18))
     public static let Optimism = Chain(id: 10, network: "optimism", name: "OP Mainnet", currency: Currency(name: "Ether", symbol: "ETH", decimals: 18))
     public static let OptimismGoerli = Chain(id: 420, network: "optimism-goerli", name: "Optimism Goerli", currency: Currency(name: "Goerli Ether", symbol: "ETH", decimals: 18))
     public static let OptimismSepolia = Chain(id: 420_69, network: "optimism-sepolia", name: "Optimism Sepolia", currency: Currency(name: "Sepolia Ether", symbol: "ETH", decimals: 18))

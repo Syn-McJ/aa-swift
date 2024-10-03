@@ -8,11 +8,9 @@
 import AASwift
 
 public let SupportedChains = [
-    Chain.PolygonMumbai.id: Chain.PolygonMumbai,
     Chain.Polygon.id: Chain.Polygon,
     Chain.MainNet.id: Chain.MainNet,
     Chain.Sepolia.id: Chain.Sepolia,
-    Chain.Goerli.id: Chain.Goerli,
     Chain.ArbitrumGoerli.id: Chain.ArbitrumGoerli,
     Chain.ArbitrumSepolia.id: Chain.ArbitrumSepolia,
     Chain.Arbitrum.id: Chain.Arbitrum,
@@ -27,16 +25,12 @@ public let SupportedChains = [
 extension Chain {
     public var alchemyRpcHttpUrl: String? {
         switch self {
-        case Chain.PolygonMumbai:
-            return "https://polygon-mumbai.g.alchemy.com/v2"
         case Chain.Polygon:
             return "https://polygon-mainnet.g.alchemy.com/v2"
         case Chain.MainNet:
             return "https://eth-mainnet.g.alchemy.com/v2"
         case Chain.Sepolia:
             return "https://eth-sepolia.g.alchemy.com/v2"
-        case Chain.Goerli:
-            return "https://eth-goerli.g.alchemy.com/v2"
         case Chain.ArbitrumGoerli:
             return "https://arb-goerli.g.alchemy.com/v2"
         case Chain.Arbitrum:
@@ -49,6 +43,8 @@ extension Chain {
             return "https://base-mainnet.g.alchemy.com/v2"
         case Chain.BaseGoerli:
             return "https://base-goerli.g.alchemy.com/v2"
+        case Chain.BaseSepolia:
+            return "https://base-sepolia.g.alchemy.com/v2/"
         default:
             return nil
         }
@@ -56,16 +52,12 @@ extension Chain {
 
     public var alchemyRpcWebSocketUrl: String? {
         switch self {
-        case Chain.PolygonMumbai:
-            return "wss://polygon-mumbai.g.alchemy.com/v2"
         case Chain.Polygon:
             return "wss://polygon-mainnet.g.alchemy.com/v2"
         case Chain.MainNet:
             return "wss://eth-mainnet.g.alchemy.com/v2"
         case Chain.Sepolia:
             return "wss://eth-sepolia.g.alchemy.com/v2"
-        case Chain.Goerli:
-            return "wss://eth-goerli.g.alchemy.com/v2"
         case Chain.ArbitrumGoerli:
             return "wss://arb-goerli.g.alchemy.com/v2"
         case Chain.Arbitrum:
@@ -78,6 +70,8 @@ extension Chain {
             return "wss://base-mainnet.g.alchemy.com/v2"
         case Chain.BaseGoerli:
             return "wss://base-goerli.g.alchemy.com/v2"
+        case Chain.BaseSepolia:
+            return "wss://base-sepolia.g.alchemy.com/v2"
         default:
             return nil
         }
