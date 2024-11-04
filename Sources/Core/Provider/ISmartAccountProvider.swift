@@ -18,6 +18,9 @@ public protocol ISmartAccountProvider {
 
     /// Returns the address of the connected account
     func getAddress() async throws -> EthereumAddress
+    
+    /// Returns the address of the smart contract account for the specified signer
+    func getAddressForSigner(signerAddress: String) async throws -> EthereumAddress
 
     /**
      Sends a user operation using the connected account.

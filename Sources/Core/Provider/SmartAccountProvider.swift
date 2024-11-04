@@ -343,6 +343,14 @@ open class SmartAccountProvider: ISmartAccountProvider {
 
         return try chain.getDefaultEntryPointAddress()
     }
+    
+    public func getAddressForSigner(signerAddress: String) async throws -> EthereumAddress {
+        guard let account = self.account else {
+            throw SmartAccountProviderError.notConnected("Account not connected")
+        }
+        
+        return try await account.getAddressForSigner(signerAddress: signerAddress)
+    }
 
     private func sendUserOperation(uoStruct: UserOperationStruct) async throws -> SendUserOperationResult {
         guard let account = self.account else {

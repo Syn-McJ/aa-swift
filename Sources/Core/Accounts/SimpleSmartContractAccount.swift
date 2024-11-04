@@ -32,10 +32,9 @@ open class SimpleSmartContractAccount: BaseSmartContractAccount {
         self.deploymentState = .notDeployed
     }
     
-    open func getAccountInitCode() async -> String {
-        let address = await signer.getAddress()
+    open func getAccountInitCode(forAddress: String) async -> String {
         let fn = ABIFunctionEncoder("createAccount")
-        try! fn.encode(EthereumAddress(address))
+        try! fn.encode(EthereumAddress(forAddress))
         try! fn.encode(BigUInt(index ?? 0))
 
         return concatHex(values: [
