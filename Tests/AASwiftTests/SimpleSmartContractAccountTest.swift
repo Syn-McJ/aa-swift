@@ -17,7 +17,7 @@ final class SimpleSmartContractAccountTest: XCTestCase  {
     
     func test_getAccountInitCode_returns_correctHex() async throws {
         let scAccount = SimpleSmartContractAccount(rpcClient: rpcClient, factoryAddress: EthereumAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"), signer: signer, chain: Chain.Polygon)
-        let result = await scAccount.getAccountInitCode()
+        let result = await scAccount.getAccountInitCode(forAddress: await signer.getAddress())
         XCTAssertEqual(
             "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d27895fbfb9cf00000000000000000000000029df43f75149d0552475a6f9b2ac96e28796ed0b0000000000000000000000000000000000000000000000000000000000000000".lowercased(),
             result.lowercased()

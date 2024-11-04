@@ -27,7 +27,7 @@ public protocol BaseSmartContractAccount: ISmartContractAccount {
     var chain: Chain { get }
     var accountAddress: EthereumAddress? { get set }
     
-    func getAccountInitCode() async -> String
+    func getAccountInitCode(forAddress: String) async -> String
 }
 
 extension BaseSmartContractAccount {
@@ -46,7 +46,7 @@ extension BaseSmartContractAccount {
             self.deploymentState = .notDeployed
         }
 
-        return await getAccountInitCode()
+        return await getAccountInitCode(forAddress: await signer.getAddress())
     }
     
     public mutating func getNonce() async throws -> BigUInt {
@@ -81,10 +81,16 @@ extension BaseSmartContractAccount {
             return address
         }
         
-        let initCode = await getAccountInitCode()
-        let encodedCall = encodeGetSenderAddress(initCode: initCode)
-        
         let signerAddress = await signer.getAddress()
+        let address = try await getAddressForSigner(signerAddress: signerAddress)
+        self.accountAddress = address
+        
+        return address
+    }
+    
+    public func getAddressForSigner(signerAddress: String) async throws -> EthereumAddress {
+        let initCode = await getAccountInitCode(forAddress: signerAddress)
+        let encodedCall = encodeGetSenderAddress(initCode: initCode)
         
         let transaction = EthereumTransaction(
             from: EthereumAddress(signerAddress),
@@ -101,10 +107,7 @@ extension BaseSmartContractAccount {
             case EthereumClientError.executionError(let details):
                 let trimmedResult = details.data!.trimmingCharacters(in: CharacterSet(charactersIn: "\" "))
                 let addressString = "0x" + trimmedResult.suffix(40)
-                let address = EthereumAddress(addressString)
-                self.accountAddress = address
-
-                return address
+                return EthereumAddress(addressString)
             default:
                 break;
             }

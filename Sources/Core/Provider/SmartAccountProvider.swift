@@ -19,8 +19,9 @@ public enum SmartAccountProviderError: Error {
 open class SmartAccountProvider: ISmartAccountProvider {
     public let rpcClient: Erc4337Client!
     public let chain: Chain!
-    let entryPointAddress: EthereumAddress!
-    let opts: SmartAccountProviderOpts!
+    
+    private let entryPointAddress: EthereumAddress!
+    private let opts: SmartAccountProviderOpts!
 
     private var account: ISmartContractAccount?
     private var gasEstimator: ClientMiddlewareFn!
@@ -29,9 +30,7 @@ open class SmartAccountProvider: ISmartAccountProvider {
     private var overridePaymasterDataMiddleware: ClientMiddlewareFn!
     private var dummyPaymasterDataMiddleware: ClientMiddlewareFn!
 
-    public var isConnected: Bool {
-        return self.account != nil
-    }
+    @Published public var isConnected = false
 
     public init(client: Erc4337Client?, rpcUrl: String?, entryPointAddress: EthereumAddress?, chain: Chain, opts: SmartAccountProviderOpts? = nil) throws {
         var rpcClient = client
@@ -58,7 +57,12 @@ open class SmartAccountProvider: ISmartAccountProvider {
     
     public func connect(account: ISmartContractAccount) {
         self.account = account
-        // TODO: this method isn't very useful atm
+        self.isConnected = true
+    }
+    
+    public func disconnect() {
+        self.account = nil
+        self.isConnected = false
     }
     
     public func getAddress() async throws -> EthereumAddress {
@@ -338,6 +342,14 @@ open class SmartAccountProvider: ISmartAccountProvider {
         }
 
         return try chain.getDefaultEntryPointAddress()
+    }
+    
+    public func getAddressForSigner(signerAddress: String) async throws -> EthereumAddress {
+        guard let account = self.account else {
+            throw SmartAccountProviderError.notConnected("Account not connected")
+        }
+        
+        return try await account.getAddressForSigner(signerAddress: signerAddress)
     }
 
     private func sendUserOperation(uoStruct: UserOperationStruct) async throws -> SendUserOperationResult {

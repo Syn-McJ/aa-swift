@@ -33,6 +33,9 @@ public protocol ISmartContractAccount {
 
     /// Returns the address of the account
     mutating func getAddress() async throws -> EthereumAddress
+    
+    /// Returns the address of the smart contract account for the specified signer
+    func getAddressForSigner(signerAddress: String) async throws -> EthereumAddress
 
     /// Returns the smart contract account owner instance if it exists
     func getOwner() async -> SmartAccountSigner?
