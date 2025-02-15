@@ -13,6 +13,14 @@ public func createPublicErc4337Client(
     rpcUrl: String,
     chain: Chain,
     headers: [String: String] = [:]
-) -> Erc4337Client {
-    return Erc4337RpcClient(url: URL(string: rpcUrl)!, network: EthereumNetwork.custom(String(describing: chain.id)), headers: headers)
+) throws -> Erc4337Client {
+    guard let validUrl = URL(string: rpcUrl) else {
+        throw ProviderError.invalidUrl("Invalid URL format: \(rpcUrl)")
+    }
+    
+    return Erc4337RpcClient(
+        url: validUrl,
+        network: EthereumNetwork.custom(chain.id.description),
+        headers: headers
+    )
 }

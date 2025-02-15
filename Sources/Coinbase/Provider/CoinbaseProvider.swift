@@ -29,7 +29,7 @@ public class CoinbaseProvider: SmartAccountProvider {
             headers["Authorization"] = "Bearer \(jwt)"
         }
         
-        let rpcClient = createCoinbaseClient(url: rpcUrl, chain: config.chain, headers: headers)
+        let rpcClient = try createCoinbaseClient(url: rpcUrl, chain: config.chain, headers: headers)
         self.rpcUrl = rpcUrl
         
         return rpcClient

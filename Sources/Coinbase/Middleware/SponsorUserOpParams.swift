@@ -1,16 +1,17 @@
 //
-//  SponsorUserOpParams.swift
-//  AA-Swift
+//  Copyright (c) 2025 aa-swift
 //
-//  Created by Andrei Ashikhmin on 8/2/25.
+//  This file is part of the aa-swift project: https://github.com/syn-mcj/aa-swift,
+//  and is released under the MIT License: https://opensource.org/licenses/MIT
 //
+
 import AASwift
 
-struct SponsorUserOpParams: Equatable, Encodable {
+public struct SponsorUserOpParams: Equatable, Encodable {
     public let userOperation: UserOperationRequest
     public let entryPoint: String
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
         try container.encode(userOperation)
         try container.encode(entryPoint)
