@@ -31,8 +31,8 @@ extension UserOperationStruct {
             callGasLimit: (callGasLimit ?? BigUInt(0)).properHexString,
             verificationGasLimit: (verificationGasLimit ?? BigUInt(0)).properHexString,
             preVerificationGas: (preVerificationGas ?? BigUInt(0)).properHexString,
-            maxFeePerGas: maxFeePerGas?.properHexString ?? "0x0",
-            maxPriorityFeePerGas: maxPriorityFeePerGas?.properHexString ?? "0x0",
+            maxFeePerGas: maxFeePerGas?.properHexString ?? "0x",
+            maxPriorityFeePerGas: maxPriorityFeePerGas?.properHexString ?? "0x",
             paymasterAndData: paymasterAndData,
             signature: signature.web3.hexString
         )

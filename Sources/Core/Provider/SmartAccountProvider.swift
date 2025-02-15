@@ -369,11 +369,6 @@ open class SmartAccountProvider: ISmartAccountProvider {
         guard uoStruct.isValidRequest else {
             throw SmartAccountProviderError.noParameters("Request is missing parameters. All properties on UserOperationStruct must be set. struct: \(uoStruct)")
         }
-//        1000367
-//        100451 ??? maxFeePerGas
-        
-//        1000000
-//        100000 ??? maxPriorityFeePerGas
 
         let address = try self.getEntryPointAddress()
         let userOperationHash = getUserOperationHash(request: uoStruct, entryPointAddress: address, chainId: self.chain.id)
