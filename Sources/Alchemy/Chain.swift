@@ -44,7 +44,7 @@ extension Chain {
         case Chain.BaseGoerli:
             return "https://base-goerli.g.alchemy.com/v2"
         case Chain.BaseSepolia:
-            return "https://base-sepolia.g.alchemy.com/v2/"
+            return "https://base-sepolia.g.alchemy.com/v2"
         default:
             return nil
         }

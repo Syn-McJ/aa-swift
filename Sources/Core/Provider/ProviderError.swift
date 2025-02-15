@@ -5,3 +5,9 @@
 //  and is released under the MIT License: https://opensource.org/licenses/MIT
 //
 
+public enum ProviderError: Error {
+    case unsupportedChain(String)
+    case rpcUrlNotFound(String)
+    case noFactoryAddress(String)
+    case invalidUrl(String)
+}

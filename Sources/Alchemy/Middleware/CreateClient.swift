@@ -14,6 +14,14 @@ public func createAlchemyClient(
     url: String,
     chain: Chain,
     headers: [String: String] = [:]
-) -> AlchemyClient {
-    return AlchemyRpcClient(url: URL(string: url)!, network: EthereumNetwork.custom(String(describing: chain.id)), headers: headers)
+) throws -> AlchemyClient {
+    guard let validUrl = URL(string: url) else {
+        throw ProviderError.invalidUrl("Invalid URL format: \(url)")
+    }
+    
+    return AlchemyRpcClient(
+        url: validUrl,
+        network: EthereumNetwork.custom(chain.id.description),
+        headers: headers
+    )
 }
