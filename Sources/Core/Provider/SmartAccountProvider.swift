@@ -37,7 +37,7 @@ open class SmartAccountProvider: ISmartAccountProvider {
         var rpcClient = client
         
         if rpcClient == nil && rpcUrl != nil {
-            rpcClient = createPublicErc4337Client(rpcUrl: rpcUrl!, chain: chain)
+            rpcClient = try createPublicErc4337Client(rpcUrl: rpcUrl!, chain: chain)
         }
 
         guard let rpcClient = rpcClient else {

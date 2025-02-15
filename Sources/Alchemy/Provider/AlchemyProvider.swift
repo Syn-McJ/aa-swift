@@ -28,7 +28,7 @@ public class AlchemyProvider: SmartAccountProvider {
         let headers = config.connectionConfig.jwt.map {
             ["Authorization": "Bearer \($0)"]
         } ?? [:]
-        let rpcClient = createAlchemyClient(url: rpcUrl, chain: config.chain, headers: headers)
+        let rpcClient = try createAlchemyClient(url: rpcUrl, chain: config.chain, headers: headers)
         self.rpcUrl = rpcUrl
 
         return rpcClient
