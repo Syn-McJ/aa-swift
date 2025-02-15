@@ -12,18 +12,27 @@ public func concatHex(values: [String]) -> String {
     return values.map { $0.web3.noHexPrefix }.joined().web3.withHexPrefix
 }
 
+extension BigUInt {
+    public var properHexString: String {
+        if self == 0 {
+            return "0x0"
+        }
+        return self.web3.hexStringNoLeadingZeroes
+    }
+}
+
 extension UserOperationStruct {
     public func toUserOperationRequest() -> UserOperationRequest {
         return UserOperationRequest(
             sender: sender,
-            nonce: nonce.web3.hexString,
+            nonce: nonce.properHexString,
             initCode: initCode,
             callData: callData,
-            callGasLimit: (callGasLimit ?? BigUInt(0)).web3.hexString,
-            verificationGasLimit: (verificationGasLimit ?? BigUInt(0)).web3.hexString,
-            preVerificationGas: (preVerificationGas ?? BigUInt(0)).web3.hexString,
-            maxFeePerGas: maxFeePerGas?.web3.hexString ?? "0x",
-            maxPriorityFeePerGas: maxPriorityFeePerGas?.web3.hexString ?? "0x",
+            callGasLimit: (callGasLimit ?? BigUInt(0)).properHexString,
+            verificationGasLimit: (verificationGasLimit ?? BigUInt(0)).properHexString,
+            preVerificationGas: (preVerificationGas ?? BigUInt(0)).properHexString,
+            maxFeePerGas: maxFeePerGas?.properHexString ?? "0x0",
+            maxPriorityFeePerGas: maxPriorityFeePerGas?.properHexString ?? "0x0",
             paymasterAndData: paymasterAndData,
             signature: signature.web3.hexString
         )

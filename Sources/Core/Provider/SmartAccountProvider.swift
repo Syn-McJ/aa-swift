@@ -20,6 +20,7 @@ open class SmartAccountProvider: ISmartAccountProvider {
     public let rpcClient: Erc4337Client!
     public let chain: Chain!
     
+    private var middlewareClient: Erc4337Client? = nil
     private let entryPointAddress: EthereumAddress!
     private let opts: SmartAccountProviderOpts!
 
@@ -219,7 +220,6 @@ open class SmartAccountProvider: ISmartAccountProvider {
     
     @discardableResult
     public func withPaymasterMiddleware(dummyPaymasterDataMiddleware: ClientMiddlewareFn?, paymasterDataMiddleware: ClientMiddlewareFn?) -> ISmartAccountProvider {
-        
         if let dummyPaymasterDataMiddleware = dummyPaymasterDataMiddleware {
             self.dummyPaymasterDataMiddleware = dummyPaymasterDataMiddleware
         }
@@ -228,6 +228,11 @@ open class SmartAccountProvider: ISmartAccountProvider {
             self.paymasterDataMiddleware = paymasterDataMiddleware
         }
         
+        return self
+    }
+
+    public func withMiddlewareRpcClient(rpcClient: Erc4337Client) -> SmartAccountProvider {
+        self.middlewareClient = rpcClient
         return self
     }
     
@@ -241,12 +246,11 @@ open class SmartAccountProvider: ISmartAccountProvider {
             paymasterDataMiddleware
         }
         
-        // Reversed order - dummyPaymasterDataMiddleware is called first
         let asyncPipe = chain(paymasterData!, with:
                         chain(gasEstimator, with:
                         chain(feeDataGetter, with:
                               dummyPaymasterDataMiddleware)))
-        return try await asyncPipe(rpcClient, &uoStruct, overrides)
+        return try await asyncPipe(middlewareClient ?? rpcClient, &uoStruct, overrides)
     }
 
     // These are dependent on the specific paymaster being used
@@ -293,12 +297,17 @@ open class SmartAccountProvider: ISmartAccountProvider {
         //
         // Refer to https://docs.alchemy.com/docs/maxpriorityfeepergas-vs-maxfeepergas
         // for more information about maxFeePerGas and maxPriorityFeePerGas
+        if overrides.maxFeePerGas != nil && overrides.maxPriorityFeePerGas != nil {
+            operation.maxFeePerGas = overrides.maxFeePerGas
+            operation.maxPriorityFeePerGas = overrides.maxPriorityFeePerGas
+            return operation
+        }
         
         let feeData = try await rpcClient.estimateFeesPerGas(chain: chain)
         var maxPriorityFeePerGas = overrides.maxPriorityFeePerGas
         
         if maxPriorityFeePerGas == nil {
-            maxPriorityFeePerGas = try await rpcClient.maxPriorityFeePerGas()
+            maxPriorityFeePerGas = try await rpcClient.eth_maxPriorityFeePerGas()
         }
         
         let maxFeePerGas = overrides.maxFeePerGas ?? (feeData.maxFeePerGas - feeData.maxPriorityFeePerGas + maxPriorityFeePerGas!)
@@ -360,6 +369,11 @@ open class SmartAccountProvider: ISmartAccountProvider {
         guard uoStruct.isValidRequest else {
             throw SmartAccountProviderError.noParameters("Request is missing parameters. All properties on UserOperationStruct must be set. struct: \(uoStruct)")
         }
+//        1000367
+//        100451 ??? maxFeePerGas
+        
+//        1000000
+//        100000 ??? maxPriorityFeePerGas
 
         let address = try self.getEntryPointAddress()
         let userOperationHash = getUserOperationHash(request: uoStruct, entryPointAddress: address, chainId: self.chain.id)
@@ -374,6 +388,8 @@ open class SmartAccountProvider: ISmartAccountProvider {
     
     private func chain<A, B, C>(_ f: @escaping (A, inout B, C) async throws -> B, with g: @escaping (A, inout B, C) async throws -> B) -> ((A, inout B, C) async throws -> B) {
         return { x, y, z in
+            var result = try await g(x, &y, z)
+            y = result
             return try await f(x, &y, z)
         }
     }

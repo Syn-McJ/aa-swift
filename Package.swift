@@ -20,6 +20,9 @@ let package = Package(
         .library(
             name: "Alchemy",
             targets: ["AASwiftAlchemy"]),
+        .library(
+            name: "Coinbase",
+            targets: ["AASwiftCoinbase"]),
     ],
     dependencies: [
         .package(url: "https://github.com/attaswift/BigInt.git", .upToNextMajor(from: "5.3.0")),
@@ -45,6 +48,16 @@ let package = Package(
             ],
             path: "Sources",
             sources: ["Alchemy"]
+        ),
+        .target(
+            name: "AASwiftCoinbase",
+            dependencies: [
+                "AASwift",
+                .product(name: "BigInt", package: "BigInt"),
+                .product(name: "web3.swift", package: "web3.swift"),
+            ],
+            path: "Sources",
+            sources: ["Coinbase"]
         ),
         .testTarget(
             name: "AASwiftTests",
