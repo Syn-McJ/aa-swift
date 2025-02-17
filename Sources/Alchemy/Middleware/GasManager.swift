@@ -11,9 +11,11 @@ import AASwift
 
 public struct AlchemyGasManagerConfig {
     public let policyId: String
+    public let connectionConfig: ConnectionConfig
     
-    public init(policyId: String) {
+    public init(policyId: String, connectionConfig: ConnectionConfig) {
         self.policyId = policyId
+        self.connectionConfig = connectionConfig
     }
 }
 
@@ -33,7 +35,7 @@ public struct AlchemyGasEstimationOptions {
     }
 }
 
-extension AlchemyProvider {
+extension SmartAccountProvider {
     /// This middleware wraps the Alchemy Gas Manager APIs to provide more flexible UserOperation gas sponsorship.
     ///
     /// If `estimateGas` is true, it will use `alchemy_requestGasAndPaymasterAndData` to get all of the gas estimates + paymaster data
@@ -50,27 +52,10 @@ extension AlchemyProvider {
     public func withAlchemyGasManager(
         config: AlchemyGasManagerConfig, 
         gasEstimationOptions: AlchemyGasEstimationOptions? = nil
-    ) -> Self {
+    ) throws -> Self {
         let fallbackFeeDataGetter = gasEstimationOptions?.fallbackFeeDataGetter ?? alchemyFeeEstimator
         let fallbackGasEstimator = gasEstimationOptions?.fallbackGasEstimator ?? defaultGasEstimator
         let disableGasEstimation = gasEstimationOptions?.disableGasEstimation ?? false
-
-        let gasEstimator: ClientMiddlewareFn = if disableGasEstimation {
-            fallbackGasEstimator
-        } else {
-            { client, uoStruct, overrides in
-                uoStruct.callGasLimit = BigUInt(0)
-                uoStruct.preVerificationGas = BigUInt(0)
-                uoStruct.verificationGasLimit = BigUInt(0)
-
-                if overrides.paymasterAndData?.isEmpty == false {
-                    return try await fallbackGasEstimator(client, &uoStruct, overrides)
-                } else {
-                    return uoStruct
-                }
-            }
-        }
-        withGasEstimator(gasEstimator: gasEstimator)
 
         let feeDataGetter: ClientMiddlewareFn = if disableGasEstimation {
             fallbackFeeDataGetter
@@ -94,11 +79,32 @@ extension AlchemyProvider {
         }
         withFeeDataGetter(feeDataGetter: feeDataGetter)
 
-        if disableGasEstimation {
-            return requestPaymasterAndData(provider: self, config: config) as! Self
+        let gasEstimator: ClientMiddlewareFn = if disableGasEstimation {
+            fallbackGasEstimator
         } else {
-            return requestGasAndPaymasterData(provider: self, config: config) as! Self
+            { client, uoStruct, overrides in
+                uoStruct.callGasLimit = BigUInt(0)
+                uoStruct.preVerificationGas = BigUInt(0)
+                uoStruct.verificationGasLimit = BigUInt(0)
+
+                if overrides.paymasterAndData?.isEmpty == false {
+                    return try await fallbackGasEstimator(client, &uoStruct, overrides)
+                } else {
+                    return uoStruct
+                }
+            }
         }
+        withGasEstimator(gasEstimator: gasEstimator)
+
+        let provider = if disableGasEstimation {
+            requestPaymasterAndData(provider: self, config: config) as! Self
+        } else {
+            requestGasAndPaymasterData(provider: self, config: config) as! Self
+        };
+        
+        return provider.withMiddlewareRpcClient(
+            rpcClient: try AlchemyProvider.createRpcClient(config: ProviderConfig(chain: chain, connectionConfig: config.connectionConfig))
+        ) as! Self
     }
 }
 
@@ -109,20 +115,20 @@ extension AlchemyProvider {
 /// @param provider - the smart account provider to override to use the paymaster middleware
 /// @param config - the alchemy gas manager configuration
 /// @returns the provider augmented to use the paymaster middleware
-func requestPaymasterAndData(provider: AlchemyProvider, config: AlchemyGasManagerConfig) -> AlchemyProvider {
+func requestPaymasterAndData(provider: SmartAccountProvider, config: AlchemyGasManagerConfig) -> SmartAccountProvider {
     provider.withPaymasterMiddleware(
         dummyPaymasterDataMiddleware: { _, uoStruct, _ in
             uoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
             return uoStruct
         },
-        paymasterDataMiddleware: { _, uoStruct, _ in
+        paymasterDataMiddleware: { client, uoStruct, _ in
             let entryPoint = try provider.getEntryPointAddress()
             let params = PaymasterAndDataParams(
                 policyId: config.policyId,
                 entryPoint: entryPoint.asString(),
                 userOperation: uoStruct.toUserOperationRequest()
             )
-            let alchemyClient = provider.rpcClient as! AlchemyClient
+            let alchemyClient = client as! AlchemyClient
             uoStruct.paymasterAndData = try await alchemyClient.requestPaymasterAndData(params: params).paymasterAndData
             return uoStruct
         }
@@ -137,23 +143,23 @@ func requestPaymasterAndData(provider: AlchemyProvider, config: AlchemyGasManage
 /// @param provider - the smart account provider to override to use the paymaster middleware
 /// @param config - the alchemy gas manager configuration
 /// @returns the provider augmented to use the paymaster middleware
-func requestGasAndPaymasterData(provider: AlchemyProvider, config: AlchemyGasManagerConfig) -> AlchemyProvider {
+func requestGasAndPaymasterData(provider: SmartAccountProvider, config: AlchemyGasManagerConfig) -> SmartAccountProvider {
     provider.withPaymasterMiddleware(
         dummyPaymasterDataMiddleware: { _, uoStruct, _ in
             uoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
             return uoStruct
         },
-        paymasterDataMiddleware: { _, uoStruct, overrides in
+        paymasterDataMiddleware: { client, uoStruct, overrides in
             let userOperation = uoStruct.toUserOperationRequest()
             let feeOverride = FeeOverride(
-                maxFeePerGas: overrides.maxFeePerGas?.web3.hexString,
-                maxPriorityFeePerGas: overrides.maxPriorityFeePerGas?.web3.hexString,
-                callGasLimit: overrides.callGasLimit?.web3.hexString,
-                verificationGasLimit: overrides.verificationGasLimit?.web3.hexString,
-                preVerificationGas: overrides.preVerificationGas?.web3.hexString
+                maxFeePerGas: overrides.maxFeePerGas?.properHexString,
+                maxPriorityFeePerGas: overrides.maxPriorityFeePerGas?.properHexString,
+                callGasLimit: overrides.callGasLimit?.properHexString,
+                verificationGasLimit: overrides.verificationGasLimit?.properHexString,
+                preVerificationGas: overrides.preVerificationGas?.properHexString
             )
 
-            if let alchemyClient = provider.rpcClient as? AlchemyClient {
+            if let alchemyClient = client as? AlchemyClient {
                 let feeOverride: FeeOverride? = if feeOverride.isEmpty { nil } else { feeOverride }
                 let result = try await alchemyClient.requestGasAndPaymasterAndData(
                     params: PaymasterAndDataParams(

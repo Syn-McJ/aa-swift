@@ -95,7 +95,7 @@ open class Erc4337RpcClient: BaseEthereumClient, Erc4337Client {
         }
     }
     
-    open func maxPriorityFeePerGas() async throws -> BigUInt {
+    open func eth_maxPriorityFeePerGas() async throws -> BigUInt {
         do {
             let emptyParams: [Bool] = []
             let data = try await networkProvider.send(method: "eth_maxPriorityFeePerGas", params: emptyParams, receive: String.self)
@@ -111,11 +111,13 @@ open class Erc4337RpcClient: BaseEthereumClient, Erc4337Client {
     }
     
     public func estimateFeesPerGas(chain: Chain) async throws -> FeeValuesEIP1559 {
-        guard let baseFeeMultiplier = chain.baseFeeMultiplier, baseFeeMultiplier >= 1.2 else {
-            throw NSError(domain: "InvalidArguments", code: 0, userInfo: [NSLocalizedDescriptionKey: "`baseFeeMultiplier` must be greater than or equal to 1.2."])
+        let baseFeeMultiplier = chain.baseFeeMultiplier ?? 1.2
+        
+        guard baseFeeMultiplier >= 1 else {
+            throw NSError(domain: "InvalidArguments", code: 0, userInfo: [NSLocalizedDescriptionKey: "`baseFeeMultiplier` must be greater than 1."])
         }
 
-        let decimals = Decimal(baseFeeMultiplier).exponent
+        let decimals = abs(Decimal(baseFeeMultiplier).exponent)
         let denominator = pow(10.0, Double(decimals))
 
         let multiply: (BigUInt) -> BigUInt = { base in
@@ -124,7 +126,7 @@ open class Erc4337RpcClient: BaseEthereumClient, Erc4337Client {
         }
 
         let block = try await eth_getBlockFeeInfoByNumber(EthereumBlock.Latest)
-        let maxPriorityFeePerGas = chain.defaultPriorityFee != nil ? chain.defaultPriorityFee! : try await maxPriorityFeePerGas()
+        let maxPriorityFeePerGas = chain.defaultPriorityFee != nil ? chain.defaultPriorityFee! : try await eth_maxPriorityFeePerGas()
         let baseFeePerGas = multiply(block.baseFeePerGas ?? BigUInt(0))
         let maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas
 

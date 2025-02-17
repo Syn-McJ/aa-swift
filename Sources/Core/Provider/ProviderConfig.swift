@@ -5,9 +5,7 @@
 //  and is released under the MIT License: https://opensource.org/licenses/MIT
 //
 
-import AASwift
-
-public struct AlchemyProviderConfig {
+public struct ProviderConfig {
     public let chain: Chain
     public let connectionConfig: ConnectionConfig
     public let opts: SmartAccountProviderOpts?

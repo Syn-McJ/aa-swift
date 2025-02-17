@@ -1,24 +1,24 @@
 //
-//  Copyright (c) 2024 aa-swift
+//  Copyright (c) 2025 aa-swift
 //
 //  This file is part of the aa-swift project: https://github.com/syn-mcj/aa-swift,
 //  and is released under the MIT License: https://opensource.org/licenses/MIT
 //
 
 import Foundation
+import AASwift
 import web3
-import BigInt
 
-public func createPublicErc4337Client(
-    rpcUrl: String,
+public func createCoinbaseClient(
+    url: String,
     chain: Chain,
     headers: [String: String] = [:]
-) throws -> Erc4337Client {
-    guard let validUrl = URL(string: rpcUrl) else {
-        throw ProviderError.invalidUrl("Invalid URL format: \(rpcUrl)")
+) throws -> CoinbaseClient {
+    guard let validUrl = URL(string: url) else {
+        throw ProviderError.invalidUrl("Invalid URL format: \(url)")
     }
     
-    return Erc4337RpcClient(
+    return CoinbaseRpcClient(
         url: validUrl,
         network: EthereumNetwork.custom(chain.id.description),
         headers: headers

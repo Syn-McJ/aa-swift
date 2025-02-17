@@ -11,7 +11,7 @@ import BigInt
 import web3
 
 class AlchemyRpcClient: Erc4337RpcClient, AlchemyClient {
-    override func maxPriorityFeePerGas() async throws -> BigUInt {
+    public func maxPriorityFeePerGas() async throws -> BigUInt {
         do {
             let emptyParams: [Bool] = []
             let data = try await networkProvider.send(method: "rundler_maxPriorityFeePerGas", params: emptyParams, receive: String.self)
@@ -26,10 +26,10 @@ class AlchemyRpcClient: Erc4337RpcClient, AlchemyClient {
         }
     }
     
-    public func requestPaymasterAndData(params: PaymasterAndDataParams) async throws -> AlchemyPaymasterAndData {
+    public func requestPaymasterAndData(params: PaymasterAndDataParams) async throws -> PaymasterAndData {
         do {
-            let data = try await networkProvider.send(method: "alchemy_requestPaymasterAndData", params: [params], receive: AlchemyPaymasterAndData.self)
-            if let result = data as? AlchemyPaymasterAndData {
+            let data = try await networkProvider.send(method: "alchemy_requestPaymasterAndData", params: [params], receive: PaymasterAndData.self)
+            if let result = data as? PaymasterAndData {
                 return result
             } else {
                 throw EthereumClientError.unexpectedReturnValue

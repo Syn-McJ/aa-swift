@@ -18,7 +18,7 @@ public struct ErrorObject: Equatable, Codable {
     public let message: String
 }
 
-public struct AlchemyPaymasterAndData: Equatable, Codable {
+public struct PaymasterAndData: Equatable, Codable {
     public let paymasterAndData: String
     public let error: ErrorObject?
 

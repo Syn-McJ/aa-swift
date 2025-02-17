@@ -51,7 +51,7 @@ extension Chain {
              Chain.BaseGoerli.id,
              Chain.BaseSepolia.id: lightAccountVersions[version]!.factoryAddress
 
-        default: throw AlchemyError.noFactoryAddress("no default light account factory contract exists for \(name)")
+        default: throw ProviderError.noFactoryAddress("no default light account factory contract exists for \(name)")
         }
     }
 }

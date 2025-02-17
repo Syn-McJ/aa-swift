@@ -5,7 +5,7 @@
 //  and is released under the MIT License: https://opensource.org/licenses/MIT
 //
 
-import Foundation
+import AASwift
 import web3
 import BigInt
 

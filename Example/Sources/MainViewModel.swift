@@ -149,17 +149,16 @@ class MainViewModel {
 
     private func setupSmartContractAccount(credentials: EthereumAccount) {
         do {
+            let connectionConfig = ConnectionConfig(apiKey: alchemyApiKey, jwt: nil, rpcUrl: nil)
             let provider = try AlchemyProvider(
                 entryPointAddress: chain.getDefaultEntryPointAddress(),
-                config: AlchemyProviderConfig(
+                config: ProviderConfig(
                     chain: chain,
-                    connectionConfig: ConnectionConfig(apiKey: alchemyApiKey,
-                                                       jwt: nil,
-                                                       rpcUrl: nil),
+                    connectionConfig: connectionConfig,
                     opts: SmartAccountProviderOpts(txMaxRetries: 50, txRetryIntervalMs: 500)
                 )
             ).withAlchemyGasManager(
-                config: AlchemyGasManagerConfig(policyId: alchemyGasPolicyId)
+                config: AlchemyGasManagerConfig(policyId: alchemyGasPolicyId, connectionConfig: connectionConfig)
             )
 
             let account = try LightSmartContractAccount(
