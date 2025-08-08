@@ -61,6 +61,6 @@ let package = Package(
         ),
         .testTarget(
             name: "AASwiftTests",
-            dependencies: ["AASwift", "MockSwift"]),
+            dependencies: ["AASwift", "AASwiftAlchemy", "MockSwift"]),
     ]
 )
