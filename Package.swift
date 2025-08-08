@@ -61,6 +61,12 @@ let package = Package(
         ),
         .testTarget(
             name: "AASwiftTests",
-            dependencies: ["AASwift", "AASwiftAlchemy", "MockSwift"]),
+            dependencies: [
+                "AASwift",
+                "AASwiftAlchemy",
+                "MockSwift",
+                .product(name: "web3.swift", package: "web3.swift"),
+                .product(name: "BigInt", package: "BigInt")
+            ]),
     ]
 )
