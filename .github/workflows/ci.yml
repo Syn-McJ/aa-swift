@@ -49,4 +49,4 @@ jobs:
         run: swift build --configuration debug
 
       - name: Run tests
-        run: swift test --parallel --enable-code-coverage --verbosity detailed
+        run: swift test --parallel --enable-code-coverage --verbose
