@@ -23,8 +23,7 @@ final class IntegrationUserOpTests: XCTestCase {
             throw XCTSkip("Missing one of required env vars: AA_TEST_PRIVKEY, AA_TEST_ALCHEMY_API_KEY, AA_TEST_ALCHEMY_GAS_POLICY_ID")
         }
 
-        // Expose mode to the code under test if it reads it; otherwise used for logging.
-        setenv("AA_MODE", mode, 1)
+        // AA_MODE is provided by CI matrix; here we just ensure code runs for both values.
 
         let connectionConfig = ConnectionConfig(apiKey: alchemyApiKey, jwt: nil, rpcUrl: nil)
         let provider = try AlchemyProvider(
