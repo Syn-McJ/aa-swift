@@ -2,14 +2,22 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "**" ]
 
 jobs:
   build-and-test:
     name: Build and Test (SwiftPM)
     runs-on: macos-14
+    strategy:
+      matrix:
+        aa_mode: [eip7702, default]
+    env:
+      AA_MODE: ${{ matrix.aa_mode }}
+      AA_TEST_PRIVKEY: ${{ secrets.AA_TEST_PRIVKEY }}
+      AA_TEST_ALCHEMY_API_KEY: ${{ secrets.AA_TEST_ALCHEMY_API_KEY }}
+      AA_TEST_ALCHEMY_GAS_POLICY_ID: ${{ secrets.AA_TEST_ALCHEMY_GAS_POLICY_ID }}
 
     steps:
       - name: Checkout repository
