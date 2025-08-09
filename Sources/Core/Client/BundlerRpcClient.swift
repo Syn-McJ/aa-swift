@@ -9,14 +9,20 @@ import web3
 import Foundation
 import BigInt
 
-public func failureHandler(_ error: Error) -> EthereumClientError {
-    if case let .executionError(result) = error as? JSONRPCError {
-        return EthereumClientError.executionError(result.error)
-    } else if case .executionError = error as? EthereumClientError, let error = error as? EthereumClientError {
-        return error
+public func failureHandler(_ error: Error, methodName: String) -> BundlerClientError {
+    let ethereumError: EthereumClientError
+    
+    if case var .executionError(result) = error as? JSONRPCError {
+        var error = result.error
+        error.data = methodName
+        ethereumError = EthereumClientError.executionError(error)
+    } else if let error = error as? EthereumClientError {
+        ethereumError = error
     } else {
-        return EthereumClientError.unexpectedReturnValue
+        ethereumError = EthereumClientError.unexpectedReturnValue
     }
+    
+    return BundlerClientError(methodName: methodName, underlyingError: ethereumError)
 }
 
 struct UserOpCallParams: Encodable {
@@ -41,7 +47,7 @@ fileprivate struct GetBlockByNumberCallParams: Encodable {
     }
 }
 
-open class Erc4337RpcClient: BaseEthereumClient, Erc4337Client {
+open class BundlerRpcClient: BaseEthereumClient, BundlerClient {
     let networkQueue: OperationQueue
 
     public init(url: URL, network: EthereumNetwork, headers: [String: String] = [:]) {
@@ -57,48 +63,56 @@ open class Erc4337RpcClient: BaseEthereumClient, Erc4337Client {
     }
     
     public func estimateUserOperationGas(request: UserOperationRequest, entryPoint: String) async throws -> EstimateUserOperationGasResponse {
+        let methodName = "eth_estimateUserOperationGas"
+        
         do {
-            let data = try await networkProvider.send(method: "eth_estimateUserOperationGas", params: UserOpCallParams(request: request, entryPoint: entryPoint), receive: EstimateUserOperationGasResponse.self)
+            let data = try await networkProvider.send(method: methodName, params: UserOpCallParams(request: request, entryPoint: entryPoint), receive: EstimateUserOperationGasResponse.self)
             if let result = data as? EstimateUserOperationGasResponse {
                 return result
             } else {
                 throw EthereumClientError.unexpectedReturnValue
             }
         } catch {
-            throw failureHandler(error)
+            throw failureHandler(error, methodName: methodName)
         }
     }
     
     public func sendUserOperation(request: UserOperationRequest, entryPoint: String) async throws -> String {
+        let methodName = "eth_sendUserOperation"
+        
         do {
-            let data = try await networkProvider.send(method: "eth_sendUserOperation", params: UserOpCallParams(request: request, entryPoint: entryPoint), receive: String.self)
+            let data = try await networkProvider.send(method: methodName, params: UserOpCallParams(request: request, entryPoint: entryPoint), receive: String.self)
             if let result = data as? String {
                 return result
             } else {
                 throw EthereumClientError.unexpectedReturnValue
             }
         } catch {
-            throw failureHandler(error)
+            throw failureHandler(error, methodName: methodName)
         }
     }
     
     public func getUserOperationReceipt(hash: String) async throws -> UserOperationReceipt {
+        let methodName = "eth_getUserOperationReceipt"
+        
         do {
-            let data = try await networkProvider.send(method: "eth_getUserOperationReceipt", params: [hash], receive: UserOperationReceipt.self)
+            let data = try await networkProvider.send(method: methodName, params: [hash], receive: UserOperationReceipt.self)
             if let result = data as? UserOperationReceipt {
                 return result
             } else {
                 throw EthereumClientError.unexpectedReturnValue
             }
         } catch {
-            throw failureHandler(error)
+            throw failureHandler(error, methodName: methodName)
         }
     }
     
     open func eth_maxPriorityFeePerGas() async throws -> BigUInt {
+        let methodName = "eth_maxPriorityFeePerGas"
+        
         do {
             let emptyParams: [Bool] = []
-            let data = try await networkProvider.send(method: "eth_maxPriorityFeePerGas", params: emptyParams, receive: String.self)
+            let data = try await networkProvider.send(method: methodName, params: emptyParams, receive: String.self)
             
             if let feeHex = data as? String, let fee = BigUInt(hex: feeHex) {
                 return fee
@@ -106,7 +120,7 @@ open class Erc4337RpcClient: BaseEthereumClient, Erc4337Client {
                 throw EthereumClientError.unexpectedReturnValue
             }
         } catch {
-            throw failureHandler(error)
+            throw failureHandler(error, methodName: methodName)
         }
     }
     
@@ -139,16 +153,17 @@ open class Erc4337RpcClient: BaseEthereumClient, Erc4337Client {
     
     public func eth_getBlockFeeInfoByNumber(_ block: EthereumBlock) async throws -> EthereumBlockFeeInfo {
         let params = GetBlockByNumberCallParams(block: block, fullTransactions: false)
+        let methodName = "eth_getBlockByNumber"
 
         do {
-            let data = try await networkProvider.send(method: "eth_getBlockByNumber", params: params, receive: EthereumBlockFeeInfo.self)
+            let data = try await networkProvider.send(method: methodName, params: params, receive: EthereumBlockFeeInfo.self)
             if let blockData = data as? EthereumBlockFeeInfo {
                 return blockData
             } else {
                 throw EthereumClientError.unexpectedReturnValue
             }
         } catch {
-            throw failureHandler(error)
+            throw failureHandler(error, methodName: methodName)
         }
     }
 }

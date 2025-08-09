@@ -7,7 +7,7 @@
 
 import AASwift
 
-public protocol CoinbaseClient: Erc4337Client {
-    func getPaymasterData(params: PaymasterDataParams) async throws -> PaymasterAndData
+public protocol CoinbaseClient: BundlerClient, Erc7677Client {
+    func getPaymasterData(params: AASwift.PaymasterDataParams) async throws -> PaymasterData
     func sponsorUserOperation(userOp: UserOperationRequest, entryPoint: String) async throws -> SponsoredUserOperation
 }

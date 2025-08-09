@@ -9,16 +9,16 @@ import Foundation
 import web3
 import BigInt
 
-public func createPublicErc4337Client(
+public func createPublicBundlerClient(
     rpcUrl: String,
     chain: Chain,
     headers: [String: String] = [:]
-) throws -> Erc4337Client {
+) throws -> BundlerClient {
     guard let validUrl = URL(string: rpcUrl) else {
         throw ProviderError.invalidUrl("Invalid URL format: \(rpcUrl)")
     }
     
-    return Erc4337RpcClient(
+    return BundlerRpcClient(
         url: validUrl,
         network: EthereumNetwork.custom(chain.id.description),
         headers: headers

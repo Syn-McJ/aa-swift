@@ -8,31 +8,40 @@
 import AASwift
 import web3
 
-class CoinbaseRpcClient: Erc4337RpcClient, CoinbaseClient {
-    public func getPaymasterData(params: PaymasterDataParams) async throws -> PaymasterAndData {
+class CoinbaseRpcClient: BundlerRpcClient, CoinbaseClient {
+    public func getPaymasterData(params: AASwift.PaymasterDataParams) async throws -> PaymasterData {
+        let methodName = "pm_getPaymasterStubData"
+        
         do {
-            let data = try await networkProvider.send(method: "pm_getPaymasterStubData", params: params, receive: PaymasterAndData.self)
-            if let result = data as? PaymasterAndData {
+            let data = try await networkProvider.send(method: methodName, params: [params], receive: PaymasterData.self)
+            if let result = data as? PaymasterData {
                 return result
             } else {
                 throw EthereumClientError.unexpectedReturnValue
             }
         } catch {
-            throw failureHandler(error)
+            throw failureHandler(error, methodName: methodName)
         }
     }
     
+    // Implement Erc7677Client protocol
+    public func getPaymasterStubData(params: AASwift.PaymasterDataParams) async throws -> PaymasterData {
+        return try await getPaymasterData(params: params)
+    }
+    
     public func sponsorUserOperation(userOp: UserOperationRequest, entryPoint: String) async throws -> SponsoredUserOperation {
+        let methodName = "pm_sponsorUserOperation"
+        
         do {
             let params = SponsorUserOpParams(userOperation: userOp, entryPoint: entryPoint)
-            let data = try await networkProvider.send(method: "pm_sponsorUserOperation", params: params, receive: SponsoredUserOperation.self)
+            let data = try await networkProvider.send(method: methodName, params: params, receive: SponsoredUserOperation.self)
             if let result = data as? SponsoredUserOperation {
                 return result
             } else {
                 throw EthereumClientError.unexpectedReturnValue
             }
         } catch {
-            throw failureHandler(error)
+            throw failureHandler(error, methodName: methodName)
         }
     }
 }

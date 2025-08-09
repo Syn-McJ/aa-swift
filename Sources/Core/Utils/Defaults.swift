@@ -13,16 +13,20 @@ public enum DefaultsError: Error {
     case noDefaultSimpleAccountFactory(String)
 }
 
-extension Chain {
+public struct Defaults {
     /**
      * Utility method returning the entry point contract address given a Chain object
      *
      * - Parameter chain: a Chain object
-     * - Returns: an Address for the given chain
+     * - Returns: an EntryPoint for the given chain
      * - Throws: if the chain doesn't have an address currently deployed
      */
-    public func getDefaultEntryPointAddress() throws -> EthereumAddress {
-        switch self.id {
+    public static func getDefaultEntryPoint(chain: Chain) throws -> EntryPoint {
+        return try getV6EntryPoint(chain: chain)
+    }
+    
+    public static func getV6EntryPoint(chain: Chain) throws -> EntryPoint {
+        switch chain.id {
         case Chain.MainNet.id,
              Chain.Sepolia.id,
              Chain.Polygon.id,
@@ -33,12 +37,41 @@ extension Chain {
              Chain.Base.id,
              Chain.BaseGoerli.id,
              Chain.BaseSepolia.id:
-            return EthereumAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
+            return EntryPoint(
+                address: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+                version: "0.6.0",
+                chain: chain
+            )
         default:
-            throw DefaultsError.noDefaultEntryPoint("no default entry point contract exists for \(name)")
+            throw DefaultsError.noDefaultEntryPoint("no default entry point contract exists for \(chain.name)")
         }
     }
+    
+    public static func getV7EntryPoint(chain: Chain) throws -> EntryPoint {
+        switch chain.id {
+        case Chain.MainNet.id,
+             Chain.Sepolia.id,
+             Chain.Polygon.id,
+             Chain.Optimism.id,
+             Chain.OptimismGoerli.id,
+             Chain.Arbitrum.id,
+             Chain.ArbitrumGoerli.id,
+             Chain.Base.id,
+             Chain.BaseGoerli.id,
+             Chain.BaseSepolia.id:
+            return EntryPoint(
+                address: "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
+                version: "0.7.0",
+                chain: chain
+            )
+        default:
+            throw DefaultsError.noDefaultEntryPoint("no default entry point contract exists for \(chain.name)")
+        }
+    }
+}
 
+extension Chain {
+    
     /**
      * Utility method returning the default simple account factory address given a Chain object
      *

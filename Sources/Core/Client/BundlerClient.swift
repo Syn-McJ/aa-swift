@@ -8,7 +8,7 @@
 import web3
 import BigInt
 
-public protocol Erc4337Client: EthereumRPCProtocol {
+public protocol BundlerClient: EthereumRPCProtocol {
     /**
      * calls eth_estimateUserOperationGas and  returns the result
      *

@@ -9,7 +9,7 @@ import Foundation
 import BigInt
 import web3
 
-public typealias ClientMiddlewareFn = (Erc4337Client, inout UserOperationStruct, UserOperationOverrides) async throws -> UserOperationStruct
+public typealias ClientMiddlewareFn = (BundlerClient, ISmartContractAccount, UserOperationStruct, UserOperationOverrides) async throws -> UserOperationStruct
 
 // Based on https://github.com/alchemyplatform/aa-sdk/blob/main/packages/core/src/provider/types.ts#L95
 public protocol ISmartAccountProvider {
@@ -80,10 +80,15 @@ public protocol ISmartAccountProvider {
     @discardableResult
     func withGasEstimator(gasEstimator: @escaping ClientMiddlewareFn) -> ISmartAccountProvider
 
-    /// Overrides the default dummy paymaster data middleware and get paymaster and data middleware
+    /// Overrides the paymasterDataMiddleware middleware which is used for setting the paymasterAndData field on the UserOperation
     @discardableResult
-    func withPaymasterMiddleware(
-        dummyPaymasterDataMiddleware: ClientMiddlewareFn?,
-        paymasterDataMiddleware: ClientMiddlewareFn?
-    ) -> ISmartAccountProvider
+    func withPaymasterMiddleware(middleware: ClientMiddlewareFn?) -> ISmartAccountProvider
+    
+    /// Overrides the dummyPaymasterDataMiddleware middleware which is used for setting dummy paymaster data during gas estimation
+    @discardableResult
+    func withDummyPaymasterMiddleware(middleware: ClientMiddlewareFn?) -> ISmartAccountProvider
+    
+    /// Overrides the userOperationSigner middleware which is used for signing the UserOperation
+    @discardableResult
+    func withUserOperationSigner(signer: @escaping ClientMiddlewareFn) -> ISmartAccountProvider
 }

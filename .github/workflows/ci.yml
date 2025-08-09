@@ -2,14 +2,22 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "**" ]
 
 jobs:
   build-and-test:
     name: Build and Test (SwiftPM)
     runs-on: macos-14
+    strategy:
+      matrix:
+        aa_mode: [eip7702, default]
+    env:
+      AA_MODE: ${{ matrix.aa_mode }}
+      AA_TEST_PRIVKEY: ${{ secrets.AA_TEST_PRIVKEY }}
+      AA_TEST_ALCHEMY_API_KEY: ${{ secrets.AA_TEST_ALCHEMY_API_KEY }}
+      AA_TEST_ALCHEMY_GAS_POLICY_ID: ${{ secrets.AA_TEST_ALCHEMY_GAS_POLICY_ID }}
 
     steps:
       - name: Checkout repository
@@ -18,7 +26,7 @@ jobs:
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '15.4'
+          xcode-version: '16.2'
 
       - name: Show Swift version
         run: swift --version
@@ -41,4 +49,4 @@ jobs:
         run: swift build --configuration debug
 
       - name: Run tests
-        run: swift test --parallel --enable-code-coverage --verbosity detailed
+        run: swift test --parallel --enable-code-coverage --verbose

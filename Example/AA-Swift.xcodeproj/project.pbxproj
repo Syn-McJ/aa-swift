@@ -13,11 +13,20 @@
 		7534806F2B690915000B4C73 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7534806D2B690915000B4C73 /* Main.storyboard */; };
 		753480712B690916000B4C73 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 753480702B690916000B4C73 /* Assets.xcassets */; };
 		753480742B690916000B4C73 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 753480722B690916000B4C73 /* LaunchScreen.storyboard */; };
+		7542B7C42E3A5C97002C957F /* Alchemy in Frameworks */ = {isa = PBXBuildFile; productRef = 7542B7C32E3A5C97002C957F /* Alchemy */; };
+		7542B7C62E3A5C97002C957F /* Coinbase in Frameworks */ = {isa = PBXBuildFile; productRef = 7542B7C52E3A5C97002C957F /* Coinbase */; };
+		7542B7C82E3A5C97002C957F /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 7542B7C72E3A5C97002C957F /* Core */; };
 		754966872B6D37DE00D1959A /* web3.swift in Frameworks */ = {isa = PBXBuildFile; productRef = 754966862B6D37DE00D1959A /* web3.swift */; };
 		7550DFF52B7E3E4200F5304B /* Alchemy in Frameworks */ = {isa = PBXBuildFile; productRef = 7550DFF42B7E3E4200F5304B /* Alchemy */; };
 		7550DFF72B7E3E4200F5304B /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 7550DFF62B7E3E4200F5304B /* Core */; };
+		758029C52E424752005808DA /* Alchemy in Frameworks */ = {isa = PBXBuildFile; productRef = 758029C42E424752005808DA /* Alchemy */; };
+		758029C72E424752005808DA /* Coinbase in Frameworks */ = {isa = PBXBuildFile; productRef = 758029C62E424752005808DA /* Coinbase */; };
+		758029C92E424752005808DA /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 758029C82E424752005808DA /* Core */; };
 		75C1D7842B69256D00FD43D3 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75C1D7832B69256D00FD43D3 /* MainViewModel.swift */; };
 		75C1D7862B6925B000FD43D3 /* Web3Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 75C1D7852B6925B000FD43D3 /* Web3Auth */; };
+		75D7C06B2E3F3C7200A4F15A /* Alchemy in Frameworks */ = {isa = PBXBuildFile; productRef = 75D7C06A2E3F3C7200A4F15A /* Alchemy */; };
+		75D7C06D2E3F3C7200A4F15A /* Coinbase in Frameworks */ = {isa = PBXBuildFile; productRef = 75D7C06C2E3F3C7200A4F15A /* Coinbase */; };
+		75D7C06F2E3F3C7200A4F15A /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 75D7C06E2E3F3C7200A4F15A /* Core */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,10 +46,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7542B7C42E3A5C97002C957F /* Alchemy in Frameworks */,
 				7550DFF52B7E3E4200F5304B /* Alchemy in Frameworks */,
+				75D7C06B2E3F3C7200A4F15A /* Alchemy in Frameworks */,
+				758029C92E424752005808DA /* Core in Frameworks */,
+				75D7C06F2E3F3C7200A4F15A /* Core in Frameworks */,
+				7542B7C62E3A5C97002C957F /* Coinbase in Frameworks */,
 				7550DFF72B7E3E4200F5304B /* Core in Frameworks */,
+				75D7C06D2E3F3C7200A4F15A /* Coinbase in Frameworks */,
 				75C1D7862B6925B000FD43D3 /* Web3Auth in Frameworks */,
+				758029C72E424752005808DA /* Coinbase in Frameworks */,
+				7542B7C82E3A5C97002C957F /* Core in Frameworks */,
 				754966872B6D37DE00D1959A /* web3.swift in Frameworks */,
+				758029C52E424752005808DA /* Alchemy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,6 +125,15 @@
 				754966862B6D37DE00D1959A /* web3.swift */,
 				7550DFF42B7E3E4200F5304B /* Alchemy */,
 				7550DFF62B7E3E4200F5304B /* Core */,
+				7542B7C32E3A5C97002C957F /* Alchemy */,
+				7542B7C52E3A5C97002C957F /* Coinbase */,
+				7542B7C72E3A5C97002C957F /* Core */,
+				75D7C06A2E3F3C7200A4F15A /* Alchemy */,
+				75D7C06C2E3F3C7200A4F15A /* Coinbase */,
+				75D7C06E2E3F3C7200A4F15A /* Core */,
+				758029C42E424752005808DA /* Alchemy */,
+				758029C62E424752005808DA /* Coinbase */,
+				758029C82E424752005808DA /* Core */,
 			);
 			productName = Example;
 			productReference = 753480652B690915000B4C73 /* Example.app */;
@@ -139,7 +166,7 @@
 			packageReferences = (
 				75FE7C102B66A64A0072163C /* XCRemoteSwiftPackageReference "web3auth-swift-sdk" */,
 				754966832B6D2F0900D1959A /* XCRemoteSwiftPackageReference "web3" */,
-				7550DFF32B7E3E4200F5304B /* XCLocalSwiftPackageReference ".." */,
+				758029C32E424752005808DA /* XCLocalSwiftPackageReference "../../aaswift" */,
 			);
 			productRefGroup = 11CA2C5F29F101D90083AFCF /* Products */;
 			projectDirPath = "";
@@ -402,9 +429,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		7550DFF32B7E3E4200F5304B /* XCLocalSwiftPackageReference ".." */ = {
+		758029C32E424752005808DA /* XCLocalSwiftPackageReference "../../aaswift" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ..;
+			relativePath = ../../aaswift;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -428,6 +455,18 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7542B7C32E3A5C97002C957F /* Alchemy */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Alchemy;
+		};
+		7542B7C52E3A5C97002C957F /* Coinbase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Coinbase;
+		};
+		7542B7C72E3A5C97002C957F /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Core;
+		};
 		754966862B6D37DE00D1959A /* web3.swift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 754966832B6D2F0900D1959A /* XCRemoteSwiftPackageReference "web3" */;
@@ -441,10 +480,34 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = Core;
 		};
+		758029C42E424752005808DA /* Alchemy */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Alchemy;
+		};
+		758029C62E424752005808DA /* Coinbase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Coinbase;
+		};
+		758029C82E424752005808DA /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Core;
+		};
 		75C1D7852B6925B000FD43D3 /* Web3Auth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 75FE7C102B66A64A0072163C /* XCRemoteSwiftPackageReference "web3auth-swift-sdk" */;
 			productName = Web3Auth;
+		};
+		75D7C06A2E3F3C7200A4F15A /* Alchemy */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Alchemy;
+		};
+		75D7C06C2E3F3C7200A4F15A /* Coinbase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Coinbase;
+		};
+		75D7C06E2E3F3C7200A4F15A /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Core;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

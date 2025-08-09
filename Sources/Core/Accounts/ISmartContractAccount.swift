@@ -24,6 +24,12 @@ public protocol ISmartContractAccount {
 
     /// Returns the nonce of the account
     mutating func getNonce() async throws -> BigUInt
+    
+    /// Returns the nonce of the account with a specific nonce key
+    mutating func getNonce(nonceKey: BigUInt) async throws -> BigUInt
+    
+    /// Returns true if the account is deployed, false otherwise
+    mutating func isAccountDeployed() async throws -> Bool
 
     /// Returns a signed and prefixed message
     func signMessage(msg: Data) async throws -> Data
@@ -38,11 +44,19 @@ public protocol ISmartContractAccount {
     func getAddressForSigner(signerAddress: String) async throws -> EthereumAddress
 
     /// Returns the smart contract account owner instance if it exists
-    func getOwner() async -> SmartAccountSigner?
+    func getSigner() -> SmartAccountSigner?
 
     /// Returns the address of the factory contract for the smart contract account
-    func getFactoryAddress() async -> EthereumAddress
+    func getFactoryAddress() async -> EthereumAddress?
+    
+    func getFactoryData(initCode: String?) async throws -> String?
 
     /// Returns the address of the entry point contract for the smart contract account
+    func getEntryPoint() -> EntryPoint
+    
+    /// Returns the entry point address as EthereumAddress
     func getEntryPointAddress() throws -> EthereumAddress
+    
+    /// Returns the implementation address for EIP-7702 accounts (optional)
+    func getImplementationAddress() -> String
 }
