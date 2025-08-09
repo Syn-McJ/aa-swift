@@ -11,7 +11,7 @@ import web3
 import MockSwift
 @testable import AASwift
 
-struct BaseSmartContractAccountTest  {
+final class BaseSmartContractAccountTest {
     @Mock private var rpcClient: EthereumRPCProtocol
     @Mock private var signer: SmartAccountSigner
     

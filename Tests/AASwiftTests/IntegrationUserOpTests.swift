@@ -4,7 +4,7 @@ import AASwiftAlchemy
 import web3
 import BigInt
 
-struct IntegrationUserOpTests {
+final class IntegrationUserOpTests {
     private let chain = Chain.Sepolia
     private let tokenAddress = "0x6F3c1baeF15F2Ac6eD52ef897f60cac0B10d90C3" // Alchemy token on Sepolia
 

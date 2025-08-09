@@ -10,7 +10,7 @@ import BigInt
 import web3
 @testable import AASwift
 
-struct UtilsTest {
+final class UtilsTest {
     var uoRequest: UserOperationRequest
     var uoStruct: UserOperationStruct
 
