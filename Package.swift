@@ -27,7 +27,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/attaswift/BigInt.git", .upToNextMajor(from: "5.3.0")),
         .package(url: "https://github.com/argentlabs/web3.swift.git", .upToNextMajor(from: "1.6.1")),
-        .package(url: "https://github.com/leoture/MockSwift.git", .upToNextMajor(from: "1.1.0"))
+        .package(url: "https://github.com/leoture/MockSwift.git", .upToNextMajor(from: "1.1.0")),
+        .package(url: "https://github.com/apple/swift-testing.git", branch: "main")
     ],
     targets: [
         .target(
@@ -66,7 +67,8 @@ let package = Package(
                 "AASwiftAlchemy",
                 "MockSwift",
                 .product(name: "web3.swift", package: "web3.swift"),
-                .product(name: "BigInt", package: "BigInt")
+                .product(name: "BigInt", package: "BigInt"),
+                .product(name: "Testing", package: "swift-testing")
             ]),
     ]
 )
