@@ -27,7 +27,6 @@ final class IntegrationUserOpTests: XCTestCase {
 
         let connectionConfig = ConnectionConfig(apiKey: alchemyApiKey, jwt: nil, rpcUrl: nil)
         let provider = try AlchemyProvider(
-            entryPointAddress: chain.getDefaultEntryPointAddress(),
             config: ProviderConfig(
                 chain: chain,
                 connectionConfig: connectionConfig,
@@ -40,14 +39,16 @@ final class IntegrationUserOpTests: XCTestCase {
         let keyStorage = EthereumKeyLocalStorage()
         let account = try EthereumAccount.importAccount(replacing: keyStorage, privateKey: privKey, keystorePassword: "")
 
+        let signer = LocalAccountSigner()
         let sca = try LightSmartContractAccount(
             rpcClient: provider.rpcClient,
-            entryPointAddress: chain.getDefaultEntryPointAddress(),
+            entryPoint: Defaults.getDefaultEntryPoint(chain: chain),
             factoryAddress: try chain.getDefaultLightAccountFactoryAddress(),
-            signer: LocalAccountSigner(account: account),
+            signer: signer,
             chain: chain
         )
 
+        signer.setCredentials(account)
         provider.connect(account: sca)
 
         // Prepare mint calls (same as MainViewModel.mint())

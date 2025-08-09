@@ -21,7 +21,7 @@ final class UtilsTest: XCTestCase {
             initCode: "0x",
             callData: "0xb61d27f6000000000000000000000000b856dbd4fa1a79a46d426f537455e7d3e79ab7c4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
             callGasLimit: "0x2f6c",
-            verificationGasLimit: "0x0114c2",
+            verificationGasLimit: "0x114c2",
             preVerificationGas: "0xa890",
             maxFeePerGas: "0x59682f1e",
             maxPriorityFeePerGas: "0x59682f00",
