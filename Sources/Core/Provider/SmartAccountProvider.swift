@@ -108,6 +108,9 @@ open class SmartAccountProvider: ISmartAccountProvider {
         let nonce = try await account.getNonce()
         let callData = await account.encodeExecute(target: data.target, value: data.value ?? BigUInt(0), data: data.data)
         let signature = account.getDummySignature()
+        
+        let entryPoint = try getEntryPoint()
+        let initialPaymasterAndData: String? = (entryPoint.version == "0.6.0") ? "0x" : nil
 
         var userOperationStruct = UserOperationStruct(
             sender: address.asString(),
@@ -115,10 +118,9 @@ open class SmartAccountProvider: ISmartAccountProvider {
             initCode: initCode,
             callData: callData,
             signature: signature,
-            paymasterAndData: "0x"
+            paymasterAndData: initialPaymasterAndData
         )
         
-        let entryPoint = try getEntryPoint()
         
         if entryPoint.version == "0.7.0" {
             if try await !account.isAccountDeployed() {
@@ -145,6 +147,9 @@ open class SmartAccountProvider: ISmartAccountProvider {
         let nonce = try await account.getNonce()
         let callData = await account.encodeBatchExecute(txs: data)
         let signature = account.getDummySignature()
+        
+        let entryPoint = try getEntryPoint()
+        let initialPaymasterAndData: String? = (entryPoint.version == "0.6.0") ? "0x" : nil
 
         var userOperationStruct = UserOperationStruct(
             sender: address.asString(),
@@ -152,10 +157,9 @@ open class SmartAccountProvider: ISmartAccountProvider {
             initCode: initCode,
             callData: callData,
             signature: signature,
-            paymasterAndData: "0x"
+            paymasterAndData: initialPaymasterAndData
         )
         
-        let entryPoint = try getEntryPoint()
         
         if entryPoint.version == "0.7.0" {
             if try await !account.isAccountDeployed() {
@@ -306,7 +310,8 @@ open class SmartAccountProvider: ISmartAccountProvider {
         overrides: UserOperationOverrides
     ) async throws -> UserOperationStruct {
         var updatedOperation = operation
-        updatedOperation.paymasterAndData = "0x"
+        let isV060 = (try? getEntryPoint().version) == "0.6.0"
+        updatedOperation.paymasterAndData = isV060 ? "0x" : nil
         return updatedOperation
     }
     
@@ -317,7 +322,8 @@ open class SmartAccountProvider: ISmartAccountProvider {
         overrides: UserOperationOverrides
     ) async throws -> UserOperationStruct {
         var updatedOperation = operation
-        updatedOperation.paymasterAndData = overrides.paymasterAndData ?? "0x"
+        let isV060 = (try? getEntryPoint().version) == "0.6.0"
+        updatedOperation.paymasterAndData = overrides.paymasterAndData ?? (isV060 ? "0x" : nil)
         return updatedOperation
     }
     
@@ -328,7 +334,8 @@ open class SmartAccountProvider: ISmartAccountProvider {
         overrides: UserOperationOverrides
     ) async throws -> UserOperationStruct {
         var updatedOperation = operation
-        updatedOperation.paymasterAndData = "0x"
+        let isV060 = (try? getEntryPoint().version) == "0.6.0"
+        updatedOperation.paymasterAndData = isV060 ? "0x" : nil
         return updatedOperation
     }
     

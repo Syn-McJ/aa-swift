@@ -126,7 +126,8 @@ func requestPaymasterAndData(provider: SmartAccountProvider, config: AlchemyGasM
     provider.withDummyPaymasterMiddleware(
         middleware: { _, _, uoStruct, _ in
             var updatedUoStruct = uoStruct
-            updatedUoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
+            let isV060 = (try? provider.getEntryPoint().version) == "0.6.0"
+            updatedUoStruct.paymasterAndData = isV060 ? dummyPaymasterAndData(chainId: provider.chain.id) : nil
             return updatedUoStruct
         }
     )
@@ -158,7 +159,8 @@ func requestGasAndPaymasterData(provider: SmartAccountProvider, config: AlchemyG
     provider.withDummyPaymasterMiddleware(
         middleware: { _, _, uoStruct, _ in
             var updatedUoStruct = uoStruct
-            updatedUoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
+            let isV060 = (try? provider.getEntryPoint().version) == "0.6.0"
+            updatedUoStruct.paymasterAndData = isV060 ? dummyPaymasterAndData(chainId: provider.chain.id) : nil
             return updatedUoStruct
         }
     )
@@ -187,7 +189,11 @@ func requestGasAndPaymasterData(provider: SmartAccountProvider, config: AlchemyG
 
                 var updatedUoStruct = uoStruct
                 // v0.6 fields
-                updatedUoStruct.paymasterAndData = result.paymasterAndData ?? "0x"
+                if (try? provider.getEntryPoint().version) == "0.6.0" {
+                    updatedUoStruct.paymasterAndData = result.paymasterAndData ?? "0x"
+                } else {
+                    updatedUoStruct.paymasterAndData = nil
+                }
                 // v0.7 fields
                 updatedUoStruct.paymaster = result.paymaster
                 updatedUoStruct.paymasterData = result.paymasterData
