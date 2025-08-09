@@ -28,7 +28,8 @@ let package = Package(
         .package(url: "https://github.com/attaswift/BigInt.git", .upToNextMajor(from: "5.3.0")),
         .package(url: "https://github.com/argentlabs/web3.swift.git", .exact("1.6.1")),
         .package(url: "https://github.com/leoture/MockSwift.git", .upToNextMajor(from: "1.1.0")),
-                          
+        // Force SPM to resolve a 0.6.x version that still exposes the 'secp256k1' product used by web3.swift
+        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift.git", .upToNextMinor(from: "0.6.0"))
     ],
     targets: [
         .target(
