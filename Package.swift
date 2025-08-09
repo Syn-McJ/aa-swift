@@ -28,8 +28,7 @@ let package = Package(
         .package(url: "https://github.com/attaswift/BigInt.git", .upToNextMajor(from: "5.3.0")),
         .package(url: "https://github.com/argentlabs/web3.swift.git", .exact("1.6.1")),
         .package(url: "https://github.com/leoture/MockSwift.git", .upToNextMajor(from: "1.1.0")),
-                          // Ensure compatibility with web3.swift which requires 0.6.0..<1.0.0
-          .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", .upToNextMajor(from: "0.6.0"))
+                          
     ],
     targets: [
         .target(
