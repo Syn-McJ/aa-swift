@@ -186,19 +186,19 @@ func requestGasAndPaymasterData(provider: SmartAccountProvider, config: AlchemyG
                 )
 
                 var updatedUoStruct = uoStruct
+                updatedUoStruct.callGasLimit = result.callGasLimit
+                updatedUoStruct.verificationGasLimit = result.verificationGasLimit
+                updatedUoStruct.preVerificationGas = result.preVerificationGas
+                updatedUoStruct.maxFeePerGas = result.maxFeePerGas
+                updatedUoStruct.maxPriorityFeePerGas = result.maxPriorityFeePerGas
                 // v0.6 fields
-                updatedUoStruct.paymasterAndData = result.paymasterAndData ?? "0x"
+                updatedUoStruct.paymasterAndData = result.paymasterAndData
                 // v0.7 fields
                 updatedUoStruct.paymaster = result.paymaster
                 updatedUoStruct.paymasterData = result.paymasterData
                 updatedUoStruct.paymasterVerificationGasLimit = result.paymasterVerificationGasLimit
                 updatedUoStruct.paymasterPostOpGasLimit = result.paymasterPostOpGasLimit
-                // Common gas fields
-                updatedUoStruct.callGasLimit = result.callGasLimit ?? BigUInt(0)
-                updatedUoStruct.verificationGasLimit = result.verificationGasLimit ?? BigUInt(0)
-                updatedUoStruct.preVerificationGas = result.preVerificationGas ?? BigUInt(0)
-                updatedUoStruct.maxFeePerGas = result.maxFeePerGas ?? BigUInt(0)
-                updatedUoStruct.maxPriorityFeePerGas = result.maxPriorityFeePerGas ?? BigUInt(0)
+                
                 return updatedUoStruct
             } else {
                 return uoStruct

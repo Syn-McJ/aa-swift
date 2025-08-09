@@ -230,7 +230,7 @@ class MainViewModel: ObservableObject {
                 factoryAddress: nil,
                 signer: signer,
                 chain: chain,
-                mode: .DEFAULT
+                mode: .EIP7702
             )
 
             signer.setCredentials(credentials)
