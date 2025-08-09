@@ -1,14 +1,16 @@
-import XCTest
+import Testing
+import Foundation
 @testable import AASwift
 import AASwiftAlchemy
 import web3
 import BigInt
 
-final class IntegrationUserOpTests: XCTestCase {
+final class IntegrationUserOpTests {
     private let chain = Chain.Sepolia
     private let tokenAddress = "0x6F3c1baeF15F2Ac6eD52ef897f60cac0B10d90C3" // Alchemy token on Sepolia
 
-    func test_SendUserOp_inEIP7702Mode_thenDefaultMode() async throws {
+    @Test
+    func SendUserOp_inEIP7702Mode_thenDefaultMode() async throws {
         try await runIntegration(mode: "eip7702")
         try await runIntegration(mode: "default")
     }
@@ -20,7 +22,7 @@ final class IntegrationUserOpTests: XCTestCase {
         let alchemyGasPolicyId = env["AA_TEST_ALCHEMY_GAS_POLICY_ID"] ?? ""
 
         guard !privKey.isEmpty, !alchemyApiKey.isEmpty, !alchemyGasPolicyId.isEmpty else {
-            throw XCTSkip("Missing one of required env vars: AA_TEST_PRIVKEY, AA_TEST_ALCHEMY_API_KEY, AA_TEST_ALCHEMY_GAS_POLICY_ID")
+            return
         }
 
         // AA_MODE is provided by CI matrix; here we just ensure code runs for both values.
@@ -72,6 +74,6 @@ final class IntegrationUserOpTests: XCTestCase {
         // Wait for inclusion
         let receipt = try await provider.waitForUserOperationTransaction(hash: hash)
         // Compare via request hash if accessible; otherwise assert non-empty receipt
-        XCTAssertFalse(receipt.userOpHash.isEmpty)
+        #expect(!receipt.userOpHash.isEmpty)
     }
 }
