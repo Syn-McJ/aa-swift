@@ -11,7 +11,7 @@ import web3
 public class CoinbaseProvider: SmartAccountProvider {
     private static var rpcUrl: String = ""
     
-    static internal func createRpcClient(config: ProviderConfig) throws -> Erc4337Client {
+    static internal func createRpcClient(config: ProviderConfig) throws -> BundlerClient {
         guard let chain = SupportedChains[config.chain.id] else {
             throw ProviderError.unsupportedChain("Unsupported chain id: \(config.chain.id)")
         }
@@ -35,8 +35,8 @@ public class CoinbaseProvider: SmartAccountProvider {
         return rpcClient
     }
     
-    public init(entryPointAddress: EthereumAddress?, config: ProviderConfig) throws {
+    public init(config: ProviderConfig) throws {
         let rpcClient = try CoinbaseProvider.createRpcClient(config: config)
-        try super.init(client: rpcClient, rpcUrl: nil, entryPointAddress: entryPointAddress, chain: config.chain, opts: config.opts)
+        try super.init(client: rpcClient, rpcUrl: nil, chain: config.chain, opts: config.opts)
     }
 }

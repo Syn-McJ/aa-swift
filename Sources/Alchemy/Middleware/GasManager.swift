@@ -60,21 +60,22 @@ extension SmartAccountProvider {
         let feeDataGetter: ClientMiddlewareFn = if disableGasEstimation {
             fallbackFeeDataGetter
         } else {
-            { client, uoStruct, overrides in
+            { client, account, uoStruct, overrides in
                 var newMaxFeePerGas = uoStruct.maxFeePerGas ?? BigUInt(0)
                 var newMaxPriorityFeePerGas = uoStruct.maxPriorityFeePerGas ?? BigUInt(0)
 
                 // but if user is bypassing paymaster to fallback to having the account to pay the gas (one-off override),
                 // we cannot delegate gas estimation to the bundler because paymaster middleware will not be called
-                if overrides.paymasterAndData == nil || overrides.paymasterAndData!.isEmpty {
-                    let result = try await fallbackFeeDataGetter(client, &uoStruct, overrides)
+                if overrides.paymasterAndData == "0x" {
+                    let result = try await fallbackFeeDataGetter(client, account, uoStruct, overrides)
                     newMaxFeePerGas = result.maxFeePerGas ?? newMaxFeePerGas
                     newMaxPriorityFeePerGas = result.maxPriorityFeePerGas ?? newMaxPriorityFeePerGas
                 }
 
-                uoStruct.maxFeePerGas = newMaxFeePerGas
-                uoStruct.maxPriorityFeePerGas = newMaxPriorityFeePerGas
-                return uoStruct
+                var updatedUoStruct = uoStruct
+                updatedUoStruct.maxFeePerGas = newMaxFeePerGas
+                updatedUoStruct.maxPriorityFeePerGas = newMaxPriorityFeePerGas
+                return updatedUoStruct
             }
         }
         withFeeDataGetter(feeDataGetter: feeDataGetter)
@@ -82,15 +83,21 @@ extension SmartAccountProvider {
         let gasEstimator: ClientMiddlewareFn = if disableGasEstimation {
             fallbackGasEstimator
         } else {
-            { client, uoStruct, overrides in
-                uoStruct.callGasLimit = BigUInt(0)
-                uoStruct.preVerificationGas = BigUInt(0)
-                uoStruct.verificationGasLimit = BigUInt(0)
-
-                if overrides.paymasterAndData?.isEmpty == false {
-                    return try await fallbackGasEstimator(client, &uoStruct, overrides)
+            { client, account, uoStruct, overrides in
+                if let modularAccount = account as? ModularAccountV2 {
+                    if modularAccount.getMode() == .EIP7702 {
+                        return try await default7702GasEstimator(
+                            client: client,
+                            account: account,
+                            userOp: uoStruct,
+                            overrides: overrides,
+                            continued: defaultGasEstimator
+                        )
+                    } else {
+                        return uoStruct
+                    }
                 } else {
-                    return uoStruct
+                    return try await defaultGasEstimator(client, account, uoStruct, overrides)
                 }
             }
         }
@@ -116,21 +123,25 @@ extension SmartAccountProvider {
 /// @param config - the alchemy gas manager configuration
 /// @returns the provider augmented to use the paymaster middleware
 func requestPaymasterAndData(provider: SmartAccountProvider, config: AlchemyGasManagerConfig) -> SmartAccountProvider {
+    provider.withDummyPaymasterMiddleware(
+        middleware: { _, _, uoStruct, _ in
+            var updatedUoStruct = uoStruct
+            updatedUoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
+            return updatedUoStruct
+        }
+    )
     provider.withPaymasterMiddleware(
-        dummyPaymasterDataMiddleware: { _, uoStruct, _ in
-            uoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
-            return uoStruct
-        },
-        paymasterDataMiddleware: { client, uoStruct, _ in
-            let entryPoint = try provider.getEntryPointAddress()
+        middleware: { client, _, uoStruct, _ in
+            let entryPoint = try provider.getEntryPoint().address
             let params = PaymasterAndDataParams(
                 policyId: config.policyId,
-                entryPoint: entryPoint.asString(),
+                entryPoint: entryPoint,
                 userOperation: uoStruct.toUserOperationRequest()
             )
             let alchemyClient = client as! AlchemyClient
-            uoStruct.paymasterAndData = try await alchemyClient.requestPaymasterAndData(params: params).paymasterAndData
-            return uoStruct
+            var updatedUoStruct = uoStruct
+            updatedUoStruct.paymasterAndData = try await alchemyClient.requestPaymasterAndData(params: params).paymasterAndData ?? "0x"
+            return updatedUoStruct
         }
     )
     return provider
@@ -144,12 +155,15 @@ func requestPaymasterAndData(provider: SmartAccountProvider, config: AlchemyGasM
 /// @param config - the alchemy gas manager configuration
 /// @returns the provider augmented to use the paymaster middleware
 func requestGasAndPaymasterData(provider: SmartAccountProvider, config: AlchemyGasManagerConfig) -> SmartAccountProvider {
+    provider.withDummyPaymasterMiddleware(
+        middleware: { _, _, uoStruct, _ in
+            var updatedUoStruct = uoStruct
+            updatedUoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
+            return updatedUoStruct
+        }
+    )
     provider.withPaymasterMiddleware(
-        dummyPaymasterDataMiddleware: { _, uoStruct, _ in
-            uoStruct.paymasterAndData = dummyPaymasterAndData(chainId: provider.chain.id)
-            return uoStruct
-        },
-        paymasterDataMiddleware: { client, uoStruct, overrides in
+        middleware: { client, _, uoStruct, overrides in
             let userOperation = uoStruct.toUserOperationRequest()
             let feeOverride = FeeOverride(
                 maxFeePerGas: overrides.maxFeePerGas?.properHexString,
@@ -164,21 +178,31 @@ func requestGasAndPaymasterData(provider: SmartAccountProvider, config: AlchemyG
                 let result = try await alchemyClient.requestGasAndPaymasterAndData(
                     params: PaymasterAndDataParams(
                         policyId: config.policyId,
-                        entryPoint: provider.getEntryPointAddress().asString(),
+                        entryPoint: try provider.getEntryPoint().address,
                         userOperation: userOperation,
                         dummySignature: userOperation.signature,
                         feeOverride: feeOverride
                     )
                 )
 
-                uoStruct.paymasterAndData = result.paymasterAndData
-                uoStruct.callGasLimit = result.callGasLimit
-                uoStruct.verificationGasLimit = result.verificationGasLimit
-                uoStruct.preVerificationGas = result.preVerificationGas
-                uoStruct.maxFeePerGas = result.maxFeePerGas
-                uoStruct.maxPriorityFeePerGas = result.maxPriorityFeePerGas
+                var updatedUoStruct = uoStruct
+                // v0.6 fields
+                updatedUoStruct.paymasterAndData = result.paymasterAndData ?? "0x"
+                // v0.7 fields
+                updatedUoStruct.paymaster = result.paymaster
+                updatedUoStruct.paymasterData = result.paymasterData
+                updatedUoStruct.paymasterVerificationGasLimit = result.paymasterVerificationGasLimit
+                updatedUoStruct.paymasterPostOpGasLimit = result.paymasterPostOpGasLimit
+                // Common gas fields
+                updatedUoStruct.callGasLimit = result.callGasLimit ?? BigUInt(0)
+                updatedUoStruct.verificationGasLimit = result.verificationGasLimit ?? BigUInt(0)
+                updatedUoStruct.preVerificationGas = result.preVerificationGas ?? BigUInt(0)
+                updatedUoStruct.maxFeePerGas = result.maxFeePerGas ?? BigUInt(0)
+                updatedUoStruct.maxPriorityFeePerGas = result.maxPriorityFeePerGas ?? BigUInt(0)
+                return updatedUoStruct
+            } else {
+                return uoStruct
             }
-            return uoStruct
         }
     )
     return provider

@@ -13,11 +13,13 @@ public struct EstimateUserOperationGasResponse: Equatable, Codable {
         case preVerificationGasStr = "preVerificationGas"
         case verificationGasLimitStr = "verificationGasLimit"
         case callGasLimitStr = "callGasLimit"
+        case paymasterVerificationGasLimitStr = "paymasterVerificationGasLimit"
     }
 
     private let preVerificationGasStr: String
     private let verificationGasLimitStr: String
     private let callGasLimitStr: String
+    private let paymasterVerificationGasLimitStr: String
 
     public var preVerificationGas: BigUInt {
         return BigUInt(hex: preVerificationGasStr)!
@@ -29,5 +31,14 @@ public struct EstimateUserOperationGasResponse: Equatable, Codable {
 
     public var callGasLimit: BigUInt {
         return BigUInt(hex: callGasLimitStr)!
+    }
+    
+    /*
+    * EntryPoint v0.7.0 operations only.
+    * The amount of gas to allocate for the paymaster validation code.
+    * Note: `eth_estimateUserOperationGas` does not return paymasterPostOpGasLimit.
+    */
+    public var paymasterVerificationGasLimit: BigUInt {
+        return BigUInt(hex: paymasterVerificationGasLimitStr)!
     }
 }

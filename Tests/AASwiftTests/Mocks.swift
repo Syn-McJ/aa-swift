@@ -40,4 +40,12 @@ extension Mock: SmartAccountSigner where WrappedType == SmartAccountSigner {
     public func signMessage(msg: Data) async -> Data {
         return Data(hex: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")!
     }
+    
+    public func signAuthorization(_ authorization: Authorization) async throws -> AuthorizationSignature {
+        return AuthorizationSignature(
+            r: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+            s: "0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+            yParity: "0x0"
+        )
+    }
 }

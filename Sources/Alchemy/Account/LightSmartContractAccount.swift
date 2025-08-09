@@ -10,7 +10,7 @@ import AASwift
 import BigInt
 
 public class LightSmartContractAccount: SimpleSmartContractAccount {
-    public override init(rpcClient: EthereumRPCProtocol, entryPointAddress: EthereumAddress? = nil, factoryAddress: EthereumAddress, signer: SmartAccountSigner, chain: Chain, accountAddress: EthereumAddress? = nil, index: Int64? = nil) {
+    public override init(rpcClient: EthereumRPCProtocol, entryPoint: EntryPoint? = nil, factoryAddress: EthereumAddress, signer: SmartAccountSigner, chain: Chain, accountAddress: EthereumAddress? = nil, index: Int64? = nil) {
         super.init(rpcClient: rpcClient, factoryAddress: factoryAddress, signer: signer, chain: chain, accountAddress: accountAddress, index: index)
     }
     

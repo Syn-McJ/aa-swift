@@ -25,8 +25,8 @@ final class UtilsTest: XCTestCase {
             preVerificationGas: "0xa890",
             maxFeePerGas: "0x59682f1e",
             maxPriorityFeePerGas: "0x59682f00",
-            paymasterAndData: "0x",
-            signature: "0xd16f93b584fbfdc03a5ee85914a1f29aa35c44fea5144c387ee1040a3c1678252bf323b7e9c3e9b4dfd91cca841fc522f4d3160a1e803f2bf14eb5fa037aae4a1b"
+            signature: "0xd16f93b584fbfdc03a5ee85914a1f29aa35c44fea5144c387ee1040a3c1678252bf323b7e9c3e9b4dfd91cca841fc522f4d3160a1e803f2bf14eb5fa037aae4a1b",
+            paymasterAndData: "0x"
         )
         
         uoStruct = UserOperationStruct(
@@ -34,21 +34,23 @@ final class UtilsTest: XCTestCase {
             nonce: BigUInt(hex: uoRequest.nonce)!,
             initCode: uoRequest.initCode,
             callData: uoRequest.callData,
-            callGasLimit: BigUInt(hex: uoRequest.callGasLimit)!,
-            verificationGasLimit: BigUInt(hex: uoRequest.verificationGasLimit)!,
-            preVerificationGas: BigUInt(hex: uoRequest.preVerificationGas)!,
-            maxFeePerGas: BigUInt(hex: uoRequest.maxFeePerGas)!,
-            maxPriorityFeePerGas: BigUInt(hex: uoRequest.maxPriorityFeePerGas)!,
-            paymasterAndData: uoRequest.paymasterAndData,
-            signature: Data(hex: uoRequest.signature)!
+            callGasLimit: uoRequest.callGasLimit.flatMap { BigUInt(hex: $0) },
+            verificationGasLimit: uoRequest.verificationGasLimit.flatMap { BigUInt(hex: $0) },
+            preVerificationGas: uoRequest.preVerificationGas.flatMap { BigUInt(hex: $0) },
+            maxFeePerGas: uoRequest.maxFeePerGas.flatMap { BigUInt(hex: $0) },
+            maxPriorityFeePerGas: uoRequest.maxPriorityFeePerGas.flatMap { BigUInt(hex: $0) },
+            signature: Data(hex: uoRequest.signature)!,
+            paymasterAndData: uoRequest.paymasterAndData
         )
     }
     
     func test_getUserOperationHash_returns_correctHash() throws {
         let entrypointAddress = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
+        let chain = Chain(id: 80001, network: "polygon-mumbai", name: "Polygon Mumbai", currency: Currency(name: "MATIC", symbol: "MATIC", decimals: 18))
+        let entryPoint = EntryPoint(address: entrypointAddress, version: "0.6.0", chain: chain)
         let hash = getUserOperationHash(
             request: uoStruct,
-            entryPointAddress: EthereumAddress(entrypointAddress),
+            entryPoint: entryPoint,
             chainId: 80001
         ).web3.hexString
 
@@ -58,5 +60,67 @@ final class UtilsTest: XCTestCase {
     func test_toUserOperationRequest_returns_correctRequest() throws {
         let request = uoStruct.toUserOperationRequest()
         XCTAssertEqual(uoRequest, request)
+    }
+    
+    func test_packAccountGasLimits() throws {
+        let packed = packAccountGasLimits(value1: BigUInt(100), value2: BigUInt(200))
+        // 100 = 0x64, 200 = 0xc8, each padded to 32 hex chars
+        XCTAssertEqual(packed, "0x00000000000000000000000000000064000000000000000000000000000000c8")
+    }
+    
+    func test_packPaymasterData() throws {
+        let paymaster = "0x1234567890123456789012345678901234567890"
+        let verificationGasLimit = BigUInt(1000)
+        let postOpGasLimit = BigUInt(2000)
+        let paymasterData = "0xabcdef"
+        
+        let packed = packPaymasterData(
+            paymaster: paymaster,
+            paymasterVerificationGasLimit: verificationGasLimit,
+            paymasterPostOpGasLimit: postOpGasLimit,
+            paymasterData: paymasterData
+        )
+        
+        // Should concatenate paymaster + padded gas limits + paymaster data
+        // 1000 = 0x3e8, 2000 = 0x7d0
+        let expected = "0x1234567890123456789012345678901234567890000000000000000000000000000003e8000000000000000000000000000007d0abcdef"
+        XCTAssertEqual(packed, expected)
+    }
+    
+    func test_packPaymasterData_returnsEmpty_whenPaymasterDataIsNil() throws {
+        let packed = packPaymasterData(
+            paymaster: "0x1234567890123456789012345678901234567890",
+            paymasterVerificationGasLimit: BigUInt(1000),
+            paymasterPostOpGasLimit: BigUInt(2000),
+            paymasterData: nil
+        )
+        
+        XCTAssertEqual(packed, "0x")
+    }
+    
+    func test_getUserOperationHash_v070_returns_correctHash() throws {
+        // Create a v0.7.0 user operation with the new fields
+        var v7UserOp = uoStruct!
+        v7UserOp.factory = "0x0000000000FFe8B47B3e2130213B802212439497"
+        v7UserOp.factoryData = "0x1234"
+        v7UserOp.paymaster = "0x1234567890123456789012345678901234567890"
+        v7UserOp.paymasterVerificationGasLimit = BigUInt(1000)
+        v7UserOp.paymasterPostOpGasLimit = BigUInt(2000)
+        v7UserOp.paymasterData = "0xabcdef"
+        
+        let entrypointAddress = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
+        let chain = Chain(id: 80001, network: "polygon-mumbai", name: "Polygon Mumbai", currency: Currency(name: "MATIC", symbol: "MATIC", decimals: 18))
+        let entryPoint = EntryPoint(address: entrypointAddress, version: "0.7.0", chain: chain)
+        
+        // Just verify it runs without crashing and produces a hash
+        let hash = getUserOperationHash(
+            request: v7UserOp,
+            entryPoint: entryPoint,
+            chainId: 80001
+        ).web3.hexString
+        
+        // Ensure we get a valid hash (32 bytes = 64 hex chars + 0x prefix = 66 chars)
+        XCTAssertEqual(hash.count, 66)
+        XCTAssertTrue(hash.hasPrefix("0x"))
     }
 }

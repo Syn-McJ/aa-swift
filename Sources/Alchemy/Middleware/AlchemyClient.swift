@@ -8,8 +8,8 @@
 import AASwift
 import BigInt
 
-public protocol AlchemyClient: Erc4337Client {
+public protocol AlchemyClient: BundlerClient, Erc7677Client {
     func maxPriorityFeePerGas() async throws -> BigUInt
-    func requestPaymasterAndData(params: PaymasterAndDataParams) async throws -> PaymasterAndData
+    func requestPaymasterAndData(params: PaymasterAndDataParams) async throws -> PaymasterData
     func requestGasAndPaymasterAndData(params: PaymasterAndDataParams) async throws -> AlchemyGasAndPaymasterAndData
 }

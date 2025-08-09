@@ -17,6 +17,7 @@ import Foundation
  *
  * @method getAddress - get the address of the signer
  * @method signMessage - sign a message
+ * @method signAuthorization - sign an EIP-7702 authorization for account delegation
  */
 public protocol SmartAccountSigner {
     /// The type of the signer (e.g., local, hardware, etc.)
@@ -26,4 +27,6 @@ public protocol SmartAccountSigner {
     func getAddress() async -> String
     /// Sign a message
     func signMessage(msg: Data) async throws -> Data
+    /// Sign an EIP-7702 authorization for account delegation
+    func signAuthorization(_ authorization: Authorization) async throws -> AuthorizationSignature
 }

@@ -13,7 +13,7 @@ import Foundation
 public class AlchemyProvider: SmartAccountProvider {
     static private var rpcUrl: String = ""
 
-    static internal func createRpcClient(config: ProviderConfig) throws -> Erc4337Client {
+    static internal func createRpcClient(config: ProviderConfig) throws -> BundlerClient {
         guard let chain = SupportedChains[config.chain.id] else {
             throw ProviderError.unsupportedChain("Unsupported chain id: \(config.chain.id)")
         }
@@ -34,9 +34,8 @@ public class AlchemyProvider: SmartAccountProvider {
         return rpcClient
     }
 
-    public init(entryPointAddress: EthereumAddress?, config: ProviderConfig) throws {
+    public init(config: ProviderConfig) throws {
         let rpcClient = try AlchemyProvider.createRpcClient(config: config)
-        try super.init(client: rpcClient, rpcUrl: nil, entryPointAddress: entryPointAddress, chain: config.chain, opts: config.opts)
-        withGasEstimator(gasEstimator: alchemyFeeEstimator)
+        try super.init(client: rpcClient, rpcUrl: nil, chain: config.chain, opts: config.opts)
     }
 }

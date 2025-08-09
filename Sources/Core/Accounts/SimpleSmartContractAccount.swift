@@ -10,29 +10,25 @@ import web3
 import BigInt
 
 open class SimpleSmartContractAccount: BaseSmartContractAccount {
-    public let chain: Chain
-    public let signer: SmartAccountSigner
-    public let rpcClient: EthereumRPCProtocol
-    public let entryPointAddress: EthereumAddress?
     public let factoryAddress: EthereumAddress
-    
-    public var deploymentState: DeploymentState
-    public var accountAddress: EthereumAddress?
-    
     private let index: Int64?
     
-    public init(rpcClient: EthereumRPCProtocol, entryPointAddress: EthereumAddress? = nil, factoryAddress: EthereumAddress, signer: SmartAccountSigner, chain: Chain, accountAddress: EthereumAddress? = nil, index: Int64? = nil) {
-        self.rpcClient = rpcClient
-        self.signer = signer
-        self.entryPointAddress = entryPointAddress
+    public init(rpcClient: EthereumRPCProtocol, entryPoint: EntryPoint? = nil, factoryAddress: EthereumAddress, signer: SmartAccountSigner, chain: Chain, accountAddress: EthereumAddress? = nil, index: Int64? = nil) {
         self.factoryAddress = factoryAddress
-        self.chain = chain
-        self.accountAddress = accountAddress
         self.index = index
+        
+        super.init(
+            rpcClient: rpcClient,
+            signer: signer,
+            chain: chain,
+            entryPoint: entryPoint,
+            accountAddress: accountAddress
+        )
+        
         self.deploymentState = .notDeployed
     }
     
-    open func getAccountInitCode(forAddress: String) async -> String {
+    open override func getAccountInitCode(forAddress: String) async -> String {
         let fn = ABIFunctionEncoder("createAccount")
         try! fn.encode(EthereumAddress(forAddress))
         try! fn.encode(BigUInt(index ?? 0))
@@ -43,12 +39,12 @@ open class SimpleSmartContractAccount: BaseSmartContractAccount {
         ])
     }
     
-    public func getDummySignature() -> Data {
+    public override func getDummySignature() -> Data {
         Data(hex: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
         )!
     }
     
-    public func encodeExecute(target: EthereumAddress, value: BigUInt, data: Data) async -> String {
+    public override func encodeExecute(target: EthereumAddress, value: BigUInt, data: Data) async -> String {
         let encodedFn = ABIFunctionEncoder("execute")
         try! encodedFn.encode(target)
         try! encodedFn.encode(value)
@@ -57,7 +53,7 @@ open class SimpleSmartContractAccount: BaseSmartContractAccount {
         return try! encodedFn.encoded().web3.hexString
     }
     
-    public func encodeBatchExecute(txs: [UserOperationCallData]) async -> String {
+    public override func encodeBatchExecute(txs: [UserOperationCallData]) async -> String {
         let targets = txs.map { $0.target }
         let datas = txs.map { $0.data }
         
@@ -68,19 +64,23 @@ open class SimpleSmartContractAccount: BaseSmartContractAccount {
         return try! encodedFn.encoded().web3.hexString
     }
     
-    public func signMessage(msg: Data) async throws -> Data {
+    public override func signMessage(msg: Data) async throws -> Data {
         try await signer.signMessage(msg: msg)
     }
     
-    public func signMessageWith6492(msg: Data) async -> Data {
+    public override func signMessageWith6492(msg: Data) async -> Data {
         fatalError("Not yet implemented")
     }
     
-    public func getOwner() async -> SmartAccountSigner? {
+    public override func getSigner() -> SmartAccountSigner? {
         return signer
     }
     
-    public func getFactoryAddress() async -> EthereumAddress {
+    public override func getFactoryAddress() async -> EthereumAddress {
         return factoryAddress
+    }
+    
+    public override func getImplementationAddress() -> String {
+        fatalError("Not yet implemented")
     }
 }
