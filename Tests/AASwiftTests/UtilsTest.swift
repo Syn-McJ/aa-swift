@@ -6,6 +6,7 @@
 //
 
 import Testing
+import Foundation
 import BigInt
 import web3
 @testable import AASwift
@@ -66,7 +67,7 @@ final class UtilsTest {
     
     @Test
     func packAccountGasLimits() throws {
-        let packed = packAccountGasLimits(value1: BigUInt(100), value2: BigUInt(200))
+        let packed = AASwift.packAccountGasLimits(value1: BigUInt(100), value2: BigUInt(200))
         // 100 = 0x64, 200 = 0xc8, each padded to 32 hex chars
         #expect(packed == "0x00000000000000000000000000000064000000000000000000000000000000c8")
     }
@@ -78,7 +79,7 @@ final class UtilsTest {
         let postOpGasLimit = BigUInt(2000)
         let paymasterData = "0xabcdef"
         
-        let packed = packPaymasterData(
+        let packed = AASwift.packPaymasterData(
             paymaster: paymaster,
             paymasterVerificationGasLimit: verificationGasLimit,
             paymasterPostOpGasLimit: postOpGasLimit,
@@ -93,7 +94,7 @@ final class UtilsTest {
     
     @Test
     func packPaymasterData_returnsEmpty_whenPaymasterDataIsNil() throws {
-        let packed = packPaymasterData(
+        let packed = AASwift.packPaymasterData(
             paymaster: "0x1234567890123456789012345678901234567890",
             paymasterVerificationGasLimit: BigUInt(1000),
             paymasterPostOpGasLimit: BigUInt(2000),

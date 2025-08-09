@@ -6,6 +6,7 @@
 //
 
 import Testing
+import Foundation
 import BigInt
 import web3
 import MockSwift
