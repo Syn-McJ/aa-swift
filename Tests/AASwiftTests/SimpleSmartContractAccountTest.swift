@@ -12,7 +12,7 @@ import MockSwift
 @testable import AASwift
 
 @Suite("Simple Smart Contract Account Tests")
-struct SimpleSmartContractAccountTest {
+final class SimpleSmartContractAccountTest {
     @Mock private var rpcClient: EthereumRPCProtocol
     @Mock private var signer: SmartAccountSigner
     
