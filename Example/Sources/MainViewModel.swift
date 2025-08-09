@@ -44,9 +44,9 @@ class MainViewModel: ObservableObject {
     private let usdcTokenAddress = "0xCFf7C6dA719408113DFcb5e36182c6d5aa491443"
     
     // replace with your Alchemy API key
-    private let alchemyApiKey = "VL04Y5WbMvKHO05PIKtTsmifkEaz8UYU"
+    private let alchemyApiKey = SharedExampleConfig.alchemyApiKey
     // replace with your Alchemy gas policy ID
-    private let alchemyGasPolicyId = "6e224b86-72a7-491b-84b4-b5741e337b10"
+    private let alchemyGasPolicyId = SharedExampleConfig.alchemyGasPolicyId
     
     // replace with your Web3Auth Client ID
     // these IDs are from Web3Auth example
@@ -54,7 +54,7 @@ class MainViewModel: ObservableObject {
     private let auth0ClientId = "hUVVf4SEsZT7syOiL0gLU9hFEtm2gQ6O"
     
     // Private key that controls the wallet
-    private let PRIVATE_KEY = "0x394add01e3372e6a2752894d5e502810ae59609e53de4f176cee6098b18e4bc6"
+    private let PRIVATE_KEY = SharedExampleConfig.privateKey
     
     // Authentication mode - default to hardcoded private key
     private var authMode: AuthMode = .privateKey

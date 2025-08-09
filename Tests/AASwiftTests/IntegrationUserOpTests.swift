@@ -6,26 +6,19 @@ import web3
 import BigInt
 
 final class IntegrationUserOpTests {
-    private let chain = Chain.Sepolia
-    private let tokenAddress = "0x6F3c1baeF15F2Ac6eD52ef897f60cac0B10d90C3" // Alchemy token on Sepolia
+    private let chain = Chain.BaseSepolia
+    private let tokenAddress = "0xCFf7C6dA719408113DFcb5e36182c6d5aa491443" // USDC on Base Sepolia (example)
 
     @Test
-    func SendUserOp_inEIP7702Mode_thenDefaultMode() async throws {
-        try await runIntegration(mode: "eip7702")
-        try await runIntegration(mode: "default")
+    func SendUserOp_respectsAAModeFromEnv() async throws {
+        try await runIntegration()
     }
 
-    private func runIntegration(mode: String) async throws {
-        let env = ProcessInfo.processInfo.environment
-        let privKey = env["AA_TEST_PRIVKEY"] ?? ""
-        let alchemyApiKey = env["AA_TEST_ALCHEMY_API_KEY"] ?? ""
-        let alchemyGasPolicyId = env["AA_TEST_ALCHEMY_GAS_POLICY_ID"] ?? ""
-
-        guard !privKey.isEmpty, !alchemyApiKey.isEmpty, !alchemyGasPolicyId.isEmpty else {
-            return
-        }
-
-        // AA_MODE is provided by CI matrix; here we just ensure code runs for both values.
+    private func runIntegration() async throws {
+        // Use shared example config (no env vars)
+        let privKey = SharedExampleConfig.privateKey
+        let alchemyApiKey = SharedExampleConfig.alchemyApiKey
+        let alchemyGasPolicyId = SharedExampleConfig.alchemyGasPolicyId
 
         let connectionConfig = ConnectionConfig(apiKey: alchemyApiKey, jwt: nil, rpcUrl: nil)
         let provider = try AlchemyProvider(
@@ -36,44 +29,43 @@ final class IntegrationUserOpTests {
             )
         ).withAlchemyGasManager(
             config: AlchemyGasManagerConfig(policyId: alchemyGasPolicyId, connectionConfig: connectionConfig)
-        )
+        ).erc7677Middleware(policyId: alchemyGasPolicyId)
 
         let keyStorage = EthereumKeyLocalStorage()
         let account = try EthereumAccount.importAccount(replacing: keyStorage, privateKey: privKey, keystorePassword: "")
 
         let signer = LocalAccountSigner()
-        let sca = try LightSmartContractAccount(
+        signer.setCredentials(account)
+
+        // Determine account mode from AA_MODE env var
+        let aaModeEnv = ProcessInfo.processInfo.environment["AA_MODE"]?.lowercased()
+        let accountMode: AccountMode = (aaModeEnv == "eip7702") ? .EIP7702 : .DEFAULT
+
+        let modular = ModularAccountV2(
             rpcClient: provider.rpcClient,
-            entryPoint: Defaults.getDefaultEntryPoint(chain: chain),
-            factoryAddress: try chain.getDefaultLightAccountFactoryAddress(),
+            factoryAddress: nil,
             signer: signer,
-            chain: chain
+            chain: chain,
+            mode: accountMode
         )
 
-        signer.setCredentials(account)
-        provider.connect(account: sca)
+        provider.connect(account: modular)
 
-        // Prepare mint calls (same as MainViewModel.mint())
+        // Prepare mint call (same as MainViewModel.mint())
         let encoder = ABIFunctionEncoder("mint")
         try await encoder.encode(provider.getAddress())
+        try encoder.encode(BigUInt("11700000000000000000000"))
 
         let hash = try await provider.sendUserOperation(
-            data: [
-                UserOperationCallData(
-                    target: EthereumAddress(tokenAddress),
-                    data: encoder.encoded()
-                ),
-                UserOperationCallData(
-                    target: EthereumAddress(tokenAddress),
-                    data: encoder.encoded()
-                ),
-            ],
+            data: UserOperationCallData(
+                target: EthereumAddress(tokenAddress),
+                data: encoder.encoded()
+            ),
             overrides: UserOperationOverrides()
         ).hash
 
         // Wait for inclusion
         let receipt = try await provider.waitForUserOperationTransaction(hash: hash)
-        // Compare via request hash if accessible; otherwise assert non-empty receipt
         #expect(!receipt.userOpHash.isEmpty)
     }
 }
