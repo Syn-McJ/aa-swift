@@ -188,17 +188,17 @@ public class ModularAccountV2: BaseSmartContractAccount {
         // ModularAccountV2 supports batch execution through executeBatch function
         let function = ABIFunctionEncoder("executeBatch")
         
-        // Encode targets array
-        let targets = txs.map { $0.target }
-        try! function.encode(targets)
+        // Create array of tuples
+        let tuples = txs.map { tx in
+            ExecuteBatchTuple(
+                target: tx.target,
+                value: tx.value ?? BigUInt(0),
+                data: tx.data
+            )
+        }
         
-        // Encode values array
-        let values = txs.map { $0.value ?? BigUInt(0) }
-        try! function.encode(values)
-        
-        // Encode datas array
-        let datas = txs.map { $0.data }
-        try! function.encode(datas)
+        // Encode the array of tuples
+        try! function.encode(tuples)
         
         return try! function.encoded().web3.hexString
     }
