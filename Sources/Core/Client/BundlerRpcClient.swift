@@ -47,6 +47,17 @@ fileprivate struct GetBlockByNumberCallParams: Encodable {
     }
 }
 
+fileprivate struct GetBlockByHashCallParams: Encodable {
+    let blockHash: String
+    let fullTransactions: Bool
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        try container.encode(blockHash)
+        try container.encode(fullTransactions)
+    }
+}
+
 open class BundlerRpcClient: BaseEthereumClient, BundlerClient {
     let networkQueue: OperationQueue
 
@@ -158,6 +169,22 @@ open class BundlerRpcClient: BaseEthereumClient, BundlerClient {
         do {
             let data = try await networkProvider.send(method: methodName, params: params, receive: EthereumBlockFeeInfo.self)
             if let blockData = data as? EthereumBlockFeeInfo {
+                return blockData
+            } else {
+                throw EthereumClientError.unexpectedReturnValue
+            }
+        } catch {
+            throw failureHandler(error, methodName: methodName)
+        }
+    }
+    
+    public func eth_getBlockByHash(_ blockHash: String, fullTransactions: Bool) async throws -> EthereumBlockInfo {
+        let params = GetBlockByHashCallParams(blockHash: blockHash, fullTransactions: fullTransactions)
+        let methodName = "eth_getBlockByHash"
+
+        do {
+            let data = try await networkProvider.send(method: methodName, params: params, receive: EthereumBlockInfo.self)
+            if let blockData = data as? EthereumBlockInfo {
                 return blockData
             } else {
                 throw EthereumClientError.unexpectedReturnValue
