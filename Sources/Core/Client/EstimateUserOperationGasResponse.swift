@@ -19,7 +19,7 @@ public struct EstimateUserOperationGasResponse: Equatable, Codable {
     private let preVerificationGasStr: String
     private let verificationGasLimitStr: String
     private let callGasLimitStr: String
-    private let paymasterVerificationGasLimitStr: String
+    private let paymasterVerificationGasLimitStr: String?
 
     public var preVerificationGas: BigUInt {
         return BigUInt(hex: preVerificationGasStr)!
@@ -38,7 +38,8 @@ public struct EstimateUserOperationGasResponse: Equatable, Codable {
     * The amount of gas to allocate for the paymaster validation code.
     * Note: `eth_estimateUserOperationGas` does not return paymasterPostOpGasLimit.
     */
-    public var paymasterVerificationGasLimit: BigUInt {
-        return BigUInt(hex: paymasterVerificationGasLimitStr)!
+    public var paymasterVerificationGasLimit: BigUInt? {
+        guard let paymasterVerificationGasLimitStr else { return nil }
+        return BigUInt(hex: paymasterVerificationGasLimitStr)
     }
 }
