@@ -24,7 +24,7 @@ public protocol SmartAccountSigner {
     var signerType: String { get }
     
     /// Get the address of the signer
-    func getAddress() async -> String
+    func getAddress() async throws -> String
     /// Sign a message
     func signMessage(msg: Data) async throws -> Data
     /// Sign an EIP-7702 authorization for account delegation

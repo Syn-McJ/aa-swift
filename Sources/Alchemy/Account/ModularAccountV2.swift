@@ -70,14 +70,14 @@ public class ModularAccountV2: BaseSmartContractAccount {
         switch mode {
         case .EIP7702:
             // EIP-7702 uses the signer's EOA address directly
-            return EthereumAddress(await signer.getAddress())
+            return EthereumAddress(try await signer.getAddress())
         case .DEFAULT:
             // ERC-4337 uses counterfactual address calculation
             if let address = self.accountAddress {
                 return address
             }
             
-            let signerAddress = await signer.getAddress()
+            let signerAddress = try await signer.getAddress()
             let address = try await getAddressForSigner(signerAddress: signerAddress)
             self.accountAddress = address
             
@@ -89,7 +89,7 @@ public class ModularAccountV2: BaseSmartContractAccount {
         switch mode {
         case .EIP7702:
             // EIP-7702 uses the signer's EOA address directly
-            let address = await signer.getAddress()
+            let address = try await signer.getAddress()
             
             if address != signerAddress {
                 throw BaseSCAError.counterfactualAddress("signerAddress parameter and the address of account's signer must match")

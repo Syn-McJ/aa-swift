@@ -43,9 +43,9 @@ public class LocalAccountSigner: SmartAccountSigner {
         self._credentials = nil
     }
     
-    public func getAddress() async -> String {
+    public func getAddress() async throws -> String {
         guard let account = _credentials else {
-            fatalError("Account not set")
+            throw NSError(domain: "LocalAccountSigner", code: 0, userInfo: [NSLocalizedDescriptionKey: "Account not set"])
         }
         return account.address.asString()
     }
