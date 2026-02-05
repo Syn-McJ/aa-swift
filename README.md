@@ -12,7 +12,7 @@ For Kotlin library, [see this](https://github.com/Syn-McJ/aa-kotlin).
 In Package.swift:  
 ```
 dependencies: [
-    .package(url: "https://github.com/syn-mcj/aa-swift.git", .upToNextMajor(from: "0.1.4"))
+    .package(url: "https://github.com/syn-mcj/aa-swift.git", .upToNextMajor(from: "0.2.4"))
 ]
 ```
 
