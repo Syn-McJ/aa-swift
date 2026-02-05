@@ -54,7 +54,7 @@ open class BaseSmartContractAccount: ISmartContractAccount {
             return address
         }
         
-        let signerAddress = await signer.getAddress()
+        let signerAddress = try await signer.getAddress()
         let address = try await getAddressForSigner(signerAddress: signerAddress)
         self.accountAddress = address
         
@@ -157,7 +157,7 @@ open class BaseSmartContractAccount: ISmartContractAccount {
         try function.encode(address)
         try function.encode(nonceKey, staticSize: 192)
         let encodedCall = try function.encoded()
-        let signerAddress = await signer.getAddress()
+        let signerAddress = try await signer.getAddress()
         
         let transaction = EthereumTransaction(
             from: EthereumAddress(signerAddress),
@@ -199,7 +199,7 @@ open class BaseSmartContractAccount: ISmartContractAccount {
             self.deploymentState = .notDeployed
         }
 
-        return await getAccountInitCode(forAddress: await signer.getAddress())
+        return await getAccountInitCode(forAddress: try await signer.getAddress())
     }
     
     public func getEntryPointAddress() throws -> EthereumAddress {

@@ -43,9 +43,9 @@ public class LocalAccountSigner: SmartAccountSigner {
         self._credentials = nil
     }
     
-    public func getAddress() async -> String {
+    public func getAddress() async throws -> String {
         guard let account = _credentials else {
-            fatalError("Account not set")
+            throw NSError(domain: "LocalAccountSigner", code: 0, userInfo: [NSLocalizedDescriptionKey: "Account not set"])
         }
         return account.address.asString()
     }
@@ -67,9 +67,10 @@ public class LocalAccountSigner: SmartAccountSigner {
         // keccak256(0x05 || rlp([chainId, contractAddress, nonce]))
         let encodedData = try encodeAuthorizationForSigning(authorization)
         let messageHash = encodedData.web3.keccak256
-        
+
         // EIP-7702 uses raw message signing without prefix
-        let signature = try account.sign(data: messageHash)
+        // IMPORTANT: Use sign(message:) not sign(data:) because sign(data:) hashes again!
+        let signature = try account.sign(message: messageHash)
         
         // Extract r, s, and v components from the 65-byte signature
         guard signature.count == 65 else {
@@ -79,14 +80,16 @@ public class LocalAccountSigner: SmartAccountSigner {
         let r = signature.prefix(32)
         let s = signature.dropFirst(32).prefix(32)
         let v = signature.last!
+
+        // The secp256k1 library returns recid as 0 or 1 directly (not 27/28 like web3j)
+        // So v is already the yParity value, no subtraction needed
+        let yParity = String(format: "0x%x", v)
         
-        // Convert v to yParity (v - 27), following EIP-7702 specification
-        let yParityValue = Int(v) - 27
-        let yParity = String(format: "0x%x", yParityValue)
-        
+        let rHex = r.web3.hexString.hasPrefix("0x") ? String(r.web3.hexString.dropFirst(2)) : r.web3.hexString
+        let sHex = s.web3.hexString.hasPrefix("0x") ? String(s.web3.hexString.dropFirst(2)) : s.web3.hexString
         return AuthorizationSignature(
-            r: "0x" + r.web3.hexString,
-            s: "0x" + s.web3.hexString,
+            r: "0x" + rHex,
+            s: "0x" + sHex,
             yParity: yParity
         )
     }
@@ -96,7 +99,7 @@ public class LocalAccountSigner: SmartAccountSigner {
     private func encodeAuthorizationForSigning(_ authorization: Authorization) throws -> Data {
         // Prepare data for RLP encoding
         let chainIdData = BigInt(authorization.chainId)
-        let contractAddressData = Data(hex: authorization.contractAddress.hasPrefix("0x") ? 
+        let contractAddressData = Data(hex: authorization.contractAddress.hasPrefix("0x") ?
             String(authorization.contractAddress.dropFirst(2)) : authorization.contractAddress)!
         let nonceData = authorization.nonce
         
